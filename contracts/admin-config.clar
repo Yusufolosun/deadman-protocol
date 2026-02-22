@@ -11,7 +11,7 @@
 (define-data-var max-beneficiaries uint u5)
 (define-data-var protocol-paused bool false)
 
-;; --- Bundled Read (reduces inter-contract call count in vault-core) ---
+;; --- Bundled Read (reduces inter-contract call count in deadman-vault-core) ---
 
 (define-read-only (get-config)
   {
