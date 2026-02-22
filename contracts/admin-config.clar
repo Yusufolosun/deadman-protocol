@@ -6,19 +6,22 @@
 (define-constant ERR-NOT-OWNER (err u100))
 (define-constant ERR-INVALID-VALUE (err u101))
 
-;; Minimum vault lock duration in blocks (~1 day at 10 min/block)
 (define-data-var min-lock-blocks uint u144)
-
-;; Maximum number of co-signers allowed per vault
 (define-data-var max-cosigners uint u5)
-
-;; Maximum number of beneficiaries allowed per vault
 (define-data-var max-beneficiaries uint u5)
-
-;; Protocol-wide pause flag. When true, no new vaults can be created.
 (define-data-var protocol-paused bool false)
 
-;; --- Read Functions ---
+;; --- Bundled Read (reduces inter-contract call count in vault-core) ---
+
+(define-read-only (get-config)
+  {
+    min-lock-blocks: (var-get min-lock-blocks),
+    max-cosigners: (var-get max-cosigners),
+    max-beneficiaries: (var-get max-beneficiaries),
+    paused: (var-get protocol-paused)
+  })
+
+;; --- Individual Reads (kept for direct queries) ---
 
 (define-read-only (get-min-lock-blocks)
   (var-get min-lock-blocks))
