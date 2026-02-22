@@ -1,0 +1,58 @@
+# -----------------------------------------------
+# Stacks / Clarinet environment configs
+# Contains RPC endpoints, account addresses, API keys
+# -----------------------------------------------
+settings/Mainnet.toml
+settings/Testnet.toml
+settings/Devnet.toml
+
+# -----------------------------------------------
+# Environment variables
+# May contain private keys, seeds, secrets
+# -----------------------------------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------------------------------
+# Wallet seeds and private keys
+# Never committed under any circumstance
+# -----------------------------------------------
+*.seed
+*.pem
+*.key
+wallet.json
+mnemonic.txt
+
+# -----------------------------------------------
+# Clarinet cache and generated artifacts
+# -----------------------------------------------
+.clarinet/
+__pycache__/
+
+# -----------------------------------------------
+# Node / Frontend dependencies and build output
+# -----------------------------------------------
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# -----------------------------------------------
+# OS and editor artifacts
+# -----------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -----------------------------------------------
+# Logs
+# -----------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
