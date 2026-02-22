@@ -104,6 +104,19 @@
     (map-set vaults vault-id (merge vault { released: true }))
     (contract-call? .release-handler execute-release vault-id (get amount vault))))
 
+;; --- Cancel Vault (owner only, before release) ---
+
+(define-public (cancel-vault (vault-id uint))
+  (let ((vault (unwrap! (map-get? vaults vault-id) ERR-VAULT-NOT-FOUND)))
+    (asserts! (is-eq tx-sender (get owner vault)) ERR-NOT-VAULT-OWNER)
+    (asserts! (not (get released vault)) ERR-ALREADY-RELEASED)
+    (map-set vaults vault-id (merge vault { released: true }))
+    (match (as-contract (stx-transfer? (get amount vault) tx-sender (get owner vault)))
+      success (begin
+        (print { event: "vault-cancelled", vault-id: vault-id, owner: tx-sender })
+        (ok true))
+      error (err u610))))
+
 ;; --- Read Functions ---
 
 (define-read-only (get-vault (vault-id uint))
