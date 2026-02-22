@@ -1,31 +1,21 @@
 ;; delegation-registry
 ;; Stores beneficiary and co-signer designations for each vault.
 ;; Vault entries are keyed by vault-id (uint) set by vault-core.
-;; This contract is write-accessible only by vault-core.
 
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant ERR-NOT-AUTHORIZED (err u300))
 (define-constant ERR-SELF-DELEGATION (err u301))
 (define-constant ERR-TOO-MANY (err u302))
 (define-constant ERR-NOT-FOUND (err u303))
+(define-constant ERR-ALREADY-APPROVED (err u304))
+(define-constant ERR-NOT-COSIGNER (err u305))
 
-;; Authorized caller -- set once at deploy time to vault-core principal.
-;; Until vault-core is deployed, this is temporarily the deployer.
 (define-data-var authorized-caller principal CONTRACT-OWNER)
 
-;; Primary beneficiary per vault
 (define-map vault-beneficiary uint principal)
-
-;; Co-signer list per vault: maps (vault-id, index) -> principal
 (define-map vault-cosigner { vault-id: uint, index: uint } principal)
-
-;; Co-signer count per vault
 (define-map vault-cosigner-count uint uint)
-
-;; Approvals: maps (vault-id, cosigner) -> bool
 (define-map cosigner-approved { vault-id: uint, cosigner: principal } bool)
-
-;; Approval count per vault
 (define-map approval-count uint uint)
 
 ;; --- Authorization ---
@@ -39,7 +29,19 @@
   (or (is-eq tx-sender (var-get authorized-caller))
       (is-eq tx-sender CONTRACT-OWNER)))
 
-;; --- Write Functions (vault-core only) ---
+;; --- Co-signer Membership Check ---
+
+;; Checks whether a principal is registered as a co-signer for a vault.
+;; Iterates up to max 5 slots (matches admin-config max-cosigners default).
+(define-read-only (is-cosigner (vault-id uint) (who principal))
+  (or
+    (is-eq (some who) (map-get? vault-cosigner { vault-id: vault-id, index: u0 }))
+    (is-eq (some who) (map-get? vault-cosigner { vault-id: vault-id, index: u1 }))
+    (is-eq (some who) (map-get? vault-cosigner { vault-id: vault-id, index: u2 }))
+    (is-eq (some who) (map-get? vault-cosigner { vault-id: vault-id, index: u3 }))
+    (is-eq (some who) (map-get? vault-cosigner { vault-id: vault-id, index: u4 }))))
+
+;; --- Write Functions ---
 
 (define-public (set-beneficiary (vault-id uint) (beneficiary principal) (owner principal))
   (begin
@@ -55,12 +57,13 @@
     (map-set vault-cosigner { vault-id: vault-id, index: current-count } cosigner)
     (ok (map-set vault-cosigner-count vault-id (+ current-count u1)))))
 
-;; Co-signer submits approval
+;; Co-signer submits approval -- caller must be a registered co-signer
 (define-public (submit-approval (vault-id uint))
-  (let ((current (default-to u0 (map-get? approval-count vault-id))))
-    (asserts! (not (default-to false (map-get? cosigner-approved { vault-id: vault-id, cosigner: tx-sender }))) ERR-NOT-AUTHORIZED)
+  (begin
+    (asserts! (is-cosigner vault-id tx-sender) ERR-NOT-COSIGNER)
+    (asserts! (not (default-to false (map-get? cosigner-approved { vault-id: vault-id, cosigner: tx-sender }))) ERR-ALREADY-APPROVED)
     (map-set cosigner-approved { vault-id: vault-id, cosigner: tx-sender } true)
-    (ok (map-set approval-count vault-id (+ current u1)))))
+    (ok (map-set approval-count vault-id (+ (default-to u0 (map-get? approval-count vault-id)) u1)))))
 
 ;; --- Read Functions ---
 
