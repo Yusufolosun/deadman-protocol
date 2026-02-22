@@ -15,17 +15,15 @@
 (define-constant ERR-ZERO-DEPOSIT (err u608))
 (define-constant ERR-DEPOSIT-FAILED (err u609))
 
-;; Vault counter
 (define-data-var next-vault-id uint u1)
 
-;; Vault record
 (define-map vaults uint {
   owner: principal,
   amount: uint,
-  condition-type: uint,       ;; u1=block-height, u2=inactivity, u3=threshold
-  target-block: uint,         ;; used by condition type u1
-  inactivity-blocks: uint,    ;; used by condition type u2
-  required-threshold: uint,   ;; used by condition type u3
+  condition-type: uint,
+  target-block: uint,
+  inactivity-blocks: uint,
+  required-threshold: uint,
   released: bool,
   created-at: uint
 })
@@ -41,9 +39,10 @@
     (beneficiary principal))
   (let (
     (vault-id (var-get next-vault-id))
-    (min-lock (contract-call? .admin-config get-min-lock-blocks))
-    (max-cosigners (contract-call? .admin-config get-max-cosigners)))
-    (asserts! (not (contract-call? .admin-config is-paused)) ERR-PAUSED)
+    (cfg (contract-call? .admin-config get-config))
+    (min-lock (get min-lock-blocks cfg))
+    (max-cosigners (get max-cosigners cfg)))
+    (asserts! (not (get paused cfg)) ERR-PAUSED)
     (asserts! (> amount u0) ERR-ZERO-DEPOSIT)
     (asserts! (and (>= condition-type u1) (<= condition-type u3)) ERR-INVALID-CONDITION)
     (asserts!
@@ -74,7 +73,7 @@
 (define-public (add-cosigner (vault-id uint) (cosigner principal))
   (let (
     (vault (unwrap! (map-get? vaults vault-id) ERR-VAULT-NOT-FOUND))
-    (max-cosigners (contract-call? .admin-config get-max-cosigners)))
+    (max-cosigners (get max-cosigners (contract-call? .admin-config get-config))))
     (asserts! (is-eq tx-sender (get owner vault)) ERR-NOT-VAULT-OWNER)
     (asserts! (not (get released vault)) ERR-ALREADY-RELEASED)
     (contract-call? .delegation-registry add-cosigner vault-id cosigner tx-sender max-cosigners)))
