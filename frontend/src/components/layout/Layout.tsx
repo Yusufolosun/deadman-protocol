@@ -1,4 +1,5 @@
 import React from 'react'
+import Navbar from './Navbar'
 import './Layout.css'
 
 interface LayoutProps {
@@ -14,10 +15,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="blob blob-3"></div>
 
             <div className="layout-container">
-                {/* Navbar will go here */}
-                <header className="layout-header">
-                    {/* Placeholder for Navbar */}
-                </header>
+                <Navbar />
 
                 <main className="layout-main animate-fade">
                     {children}
