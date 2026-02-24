@@ -1,5 +1,6 @@
 import React from 'react'
 import Navbar from './Navbar'
+import Footer from './Footer'
 import './Layout.css'
 
 interface LayoutProps {
@@ -22,7 +23,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </main>
 
                 <footer className="layout-footer">
-                    {/* Placeholder for Footer */}
+                    <Footer />
                 </footer>
             </div>
         </div>
