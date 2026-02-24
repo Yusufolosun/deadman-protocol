@@ -92,13 +92,32 @@ const CreateVault: React.FC = () => {
                         </div>
 
                         {formData.conditionType === '1' && (
-                            <Input label="Target Block Height" type="number" placeholder="e.g. 150000" />
+                            <Input
+                                label="Target Block Height"
+                                type="number"
+                                placeholder="e.g. 150000"
+                                value={formData.targetBlock}
+                                onChange={e => setFormData({ ...formData, targetBlock: e.target.value })}
+                            />
                         )}
                         {formData.conditionType === '2' && (
-                            <Input label="Inactivity Threshold (Blocks)" type="number" placeholder="e.g. 2000" helpText="~2 weeks at 10m/block" />
+                            <Input
+                                label="Inactivity Threshold (Blocks)"
+                                type="number"
+                                placeholder="e.g. 2000"
+                                helpText="~2 weeks at 10m/block"
+                                value={formData.inactivityBlocks}
+                                onChange={e => setFormData({ ...formData, inactivityBlocks: e.target.value })}
+                            />
                         )}
                         {formData.conditionType === '3' && (
-                            <Input label="Required Approvals" type="number" placeholder="1" />
+                            <Input
+                                label="Required Approvals"
+                                type="number"
+                                placeholder="1"
+                                value={formData.threshold}
+                                onChange={e => setFormData({ ...formData, threshold: e.target.value })}
+                            />
                         )}
 
                         <div className="step-actions">
@@ -112,7 +131,12 @@ const CreateVault: React.FC = () => {
                     <div className="form-step animate-slide-up">
                         <h2 className="font-heading">Trust Delegation</h2>
                         <p className="text-secondary">Specify who receives the assets and who must approve the release.</p>
-                        <Input label="Beneficiary STX Address" placeholder="SP..." value={formData.beneficiary} />
+                        <Input
+                            label="Beneficiary STX Address"
+                            placeholder="SP..."
+                            value={formData.beneficiary}
+                            onChange={e => setFormData({ ...formData, beneficiary: e.target.value })}
+                        />
 
                         <div className="step-actions">
                             <Button variant="ghost" onClick={handleBack} leftIcon={<ArrowLeft size={18} />}>Back</Button>
