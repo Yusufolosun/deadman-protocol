@@ -7,6 +7,7 @@ interface CardProps {
     onClick?: () => void
     hoverable?: boolean
     padding?: 'none' | 'sm' | 'md' | 'lg'
+    style?: React.CSSProperties
 }
 
 const Card: React.FC<CardProps> = ({
@@ -15,11 +16,13 @@ const Card: React.FC<CardProps> = ({
     onClick,
     hoverable = false,
     padding = 'md',
+    style,
 }) => {
     return (
         <div
             className={`card glass ${hoverable ? 'hoverable' : ''} ${onClick ? 'clickable' : ''} padding-${padding} ${className}`}
             onClick={onClick}
+            style={style}
         >
             {children}
         </div>

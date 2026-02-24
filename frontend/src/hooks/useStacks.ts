@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { callReadOnlyFunction, cvToValue } from '@stacks/transactions'
+import { fetchCallReadOnlyFunction, cvToValue } from '@stacks/transactions'
 import { getNetwork, getContractOwnerAddress } from '@/lib/stacks'
 import { CONTRACTS } from '@/lib/contracts'
 import { uintCV, principalCV } from '@stacks/transactions'
@@ -18,7 +18,7 @@ export const useStacks = () => {
                 network,
                 senderAddress: contractAddress, // Default sender
             }
-            const response = await callReadOnlyFunction(options)
+            const response = await fetchCallReadOnlyFunction(options)
             return cvToValue(response)
         } catch (error) {
             console.error(`Read-only call failed: ${functionName}`, error)

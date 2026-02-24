@@ -1,4 +1,4 @@
-import { uintCV, principalCV, boolCV } from '@stacks/transactions'
+import { uintCV, principalCV } from '@stacks/transactions'
 import { getNetwork, getContractOwnerAddress } from './stacks'
 
 // Contract Names
