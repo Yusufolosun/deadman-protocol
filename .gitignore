@@ -5,7 +5,7 @@
 settings/Mainnet.toml
 settings/Testnet.toml
 settings/Devnet.toml
-
+deployments/
 # -----------------------------------------------
 # Environment variables
 # May contain private keys, seeds, secrets
