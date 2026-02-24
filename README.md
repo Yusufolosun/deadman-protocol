@@ -1,4 +1,4 @@
-✔ 6 contracts checked# Deadman Protocol
+# Deadman Protocol
 
 A generalized on-chain trust delegation and conditional transfer protocol built on Stacks.
 
