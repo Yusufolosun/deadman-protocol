@@ -1,6 +1,6 @@
 ;; release-handler
 ;; Executes STX transfer to beneficiary once conditions are verified.
-;; Not directly callable by users. Called exclusively by vault-core.
+;; Not directly callable by users. Called exclusively by deadman-vault-core.
 ;; Emits a structured release event on success.
 
 (define-constant CONTRACT-OWNER tx-sender)
@@ -25,7 +25,7 @@
 ;; --- Release Execution ---
 
 ;; Transfers STX from the contract's balance to the beneficiary.
-;; Only callable by vault-core after condition verification.
+;; Only callable by deadman-vault-core after condition verification.
 (define-public (execute-release (vault-id uint) (amount uint))
   (let ((beneficiary (unwrap! (contract-call? .delegation-registry get-beneficiary vault-id) ERR-NO-BENEFICIARY)))
     (asserts! (is-authorized) ERR-NOT-AUTHORIZED)

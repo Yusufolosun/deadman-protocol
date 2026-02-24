@@ -27,7 +27,7 @@
 (define-read-only (check-threshold (approval-count uint) (required-threshold uint))
   (>= approval-count required-threshold))
 
-;; Master condition evaluator -- called by vault-core before release.
+;; Master condition evaluator -- called by deadman-vault-core before release.
 ;; condition-type: u1 = block-height, u2 = inactivity, u3 = threshold
 (define-read-only (evaluate-condition
     (condition-type uint)

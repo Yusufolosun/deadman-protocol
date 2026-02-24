@@ -1,4 +1,4 @@
-;; vault-core
+;; deadman-vault-core
 ;; Primary entry point for the Deadman Protocol.
 ;; Users create vaults, configure conditions, deposit STX, and trigger releases here.
 ;; Orchestrates all other contracts.
