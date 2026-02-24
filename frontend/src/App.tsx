@@ -1,9 +1,14 @@
+import Layout from '@/components/layout/Layout'
+import './App.css'
+
 function App() {
   return (
-    <div className="app">
-      <h1>Deadman Protocol</h1>
-      <p>Building on-chain trust delegation.</p>
-    </div>
+    <Layout>
+      <section className="hero animate-slide-up">
+        <h1 className="font-heading">Secure Your Legacy.</h1>
+        <p className="text-secondary">On-chain trust delegation and dead man's switch protocol on Stacks.</p>
+      </section>
+    </Layout>
   )
 }
 
