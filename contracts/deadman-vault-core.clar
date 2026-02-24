@@ -14,6 +14,7 @@
 (define-constant ERR-LOCK-TOO-SHORT (err u607))
 (define-constant ERR-ZERO-DEPOSIT (err u608))
 (define-constant ERR-DEPOSIT-FAILED (err u609))
+(define-constant ERR-CANCEL-FAILED (err u610))
 
 (define-data-var next-vault-id uint u1)
 
@@ -113,9 +114,9 @@
     (map-set vaults vault-id (merge vault { released: true }))
     (match (as-contract (stx-transfer? (get amount vault) tx-sender (get owner vault)))
       success (begin
-        (print { event: "vault-cancelled", vault-id: vault-id, owner: tx-sender })
+        (print { event: "vault-cancelled", vault-id: vault-id, owner: (get owner vault) })
         (ok true))
-      error (err u610))))
+      error ERR-CANCEL-FAILED))))
 
 ;; --- Read Functions ---
 
