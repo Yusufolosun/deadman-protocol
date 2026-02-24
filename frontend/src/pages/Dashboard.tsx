@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate()
-    const { isConnected, userData } = useAuth()
+    const { isConnected } = useAuth()
 
     // Mock data for initial layout
     const stats = [
