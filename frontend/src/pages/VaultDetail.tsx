@@ -6,14 +6,12 @@ import Button from '@/components/common/Button'
 import Badge from '@/components/common/Badge'
 import Spinner from '@/components/common/Spinner'
 import { Shield, Clock, Users, ArrowLeft, Trash2, Zap, UserPlus, Info } from 'lucide-react'
-import { useStacks } from '@/hooks/useStacks'
 import { useVault } from '@/hooks/useVault'
 import { useAuth } from '@/hooks/useAuth'
 
 const VaultDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const { } = useStacks()
     const { cancelVault, triggerRelease } = useVault()
     const { userData } = useAuth()
 

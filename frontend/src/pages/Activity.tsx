@@ -5,13 +5,11 @@ import Button from '@/components/common/Button'
 import Badge from '@/components/common/Badge'
 import Spinner from '@/components/common/Spinner'
 import { Activity as ActivityIcon, Clock, Zap, ShieldCheck, History } from 'lucide-react'
-import { useStacks } from '@/hooks/useStacks'
 import { useVault } from '@/hooks/useVault'
 import { useAuth } from '@/hooks/useAuth'
 
 const ActivityPage: React.FC = () => {
     const { isConnected, userData } = useAuth()
-    const { } = useStacks()
     const { pingActivity } = useVault()
 
     const [loading, setLoading] = useState(true)

@@ -5,11 +5,9 @@ import Button from '@/components/common/Button'
 import Spinner from '@/components/common/Spinner'
 import { Info, ShieldAlert, Cpu, Network } from 'lucide-react'
 import { useStacks } from '@/hooks/useStacks'
-import { useAuth } from '@/hooks/useAuth'
 
 const SettingsPage: React.FC = () => {
-    const { } = useStacks()
-    const { } = useAuth()
+    const { getProtocolConfig } = useStacks()
 
     const [loading, setLoading] = useState(true)
     const [config, setConfig] = useState<any>(null)
