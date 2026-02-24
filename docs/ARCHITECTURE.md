@@ -8,7 +8,7 @@ calls. No contract holds responsibilities outside its domain.
 
 ## Contracts
 
-### vault-core
+### deadman-vault-core
 The primary entry point. Users create and manage vaults here. Holds STX balances
 and references conditions defined in condition-engine. Enforces that only the
 vault owner can modify vault parameters before activation.
@@ -30,7 +30,7 @@ condition-engine to evaluate inactivity-based triggers without off-chain data.
 ### release-handler
 Executes vault release once condition-engine confirms conditions are met.
 Transfers STX to the designated beneficiary. Emits a release event. This
-contract cannot be called directly by users — only by vault-core.
+contract cannot be called directly by users — only by deadman-vault-core.
 
 ### admin-config
 Stores protocol-level configuration: minimum vault duration (in blocks),
@@ -39,11 +39,11 @@ the deployer address. No upgrade proxy pattern — values are simple data vars.
 
 ## Call Flow
 ```
-User → vault-core (create-vault)
+User → deadman-vault-core (create-vault)
 User → activity-tracker (ping)
-User/Co-signer → vault-core (approve / trigger-release)
-vault-core → condition-engine (check-conditions)
-vault-core → release-handler (execute-release)
+User/Co-signer → deadman-vault-core (approve / trigger-release)
+deadman-vault-core → condition-engine (evaluate-condition)
+deadman-vault-core → release-handler (execute-release)
 release-handler → delegation-registry (get-beneficiary)
 ```
 
