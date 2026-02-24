@@ -4,12 +4,12 @@ import Card from '@/components/common/Card'
 import Button from '@/components/common/Button'
 import Badge from '@/components/common/Badge'
 import Spinner from '@/components/common/Spinner'
-import { Users, CheckCircle, Shield, ArrowUpRight } from 'lucide-react'
+import { Users, CheckCircle, Shield } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useVault } from '@/hooks/useVault'
 
 const Approvals: React.FC = () => {
-    const { isConnected, userData } = useAuth()
+    const { isConnected } = useAuth()
     const { submitApproval } = useVault()
 
     const [loading, setLoading] = useState(true)

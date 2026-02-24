@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import './Navbar.css'
 import { Link, useLocation } from 'react-router-dom'
-import { Shield, LayoutDashboard, PlusCircle, Activity as ActivityIcon, Wallet, LogOut, ChevronDown } from 'lucide-react'
+import { Shield, LayoutDashboard, PlusCircle, Activity as ActivityIcon, Wallet, LogOut, ChevronDown, CheckCircle, Settings } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 const Navbar: React.FC = () => {
@@ -13,6 +13,7 @@ const Navbar: React.FC = () => {
         { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
         { label: 'Create Vault', path: '/vault/create', icon: <PlusCircle size={18} /> },
         { label: 'Activity', path: '/activity', icon: <ActivityIcon size={18} /> },
+        { label: 'Approvals', path: '/approvals', icon: <CheckCircle size={18} /> },
     ]
 
     const truncateAddress = (addr: string) => {
@@ -56,6 +57,10 @@ const Navbar: React.FC = () => {
 
                             {isDropdownOpen && (
                                 <div className="user-dropdown glass animate-fade">
+                                    <Link to="/settings" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                                        <Settings size={16} />
+                                        <span>Settings</span>
+                                    </Link>
                                     <button onClick={() => { disconnect(); setIsDropdownOpen(false); }} className="dropdown-item danger">
                                         <LogOut size={16} />
                                         <span>Disconnect</span>
