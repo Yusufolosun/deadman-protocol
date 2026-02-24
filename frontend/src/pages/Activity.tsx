@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth'
 
 const ActivityPage: React.FC = () => {
     const { isConnected, userData } = useAuth()
-    const { getLastActive } = useStacks()
+    const { } = useStacks()
     const { pingActivity } = useVault()
 
     const [loading, setLoading] = useState(true)
