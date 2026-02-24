@@ -6,6 +6,7 @@ import CreateVault from '@/pages/CreateVault'
 import VaultDetail from '@/pages/VaultDetail'
 import ActivityPage from '@/pages/Activity'
 import Approvals from '@/pages/Approvals'
+import SettingsPage from '@/pages/Settings'
 import './App.css'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/vault/:id" element={<VaultDetail />} />
         <Route path="/activity" element={<ActivityPage />} />
         <Route path="/approvals" element={<Approvals />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </Layout>
   )
