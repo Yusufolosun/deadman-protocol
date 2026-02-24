@@ -3,13 +3,13 @@ import './Settings.css'
 import Card from '@/components/common/Card'
 import Button from '@/components/common/Button'
 import Spinner from '@/components/common/Spinner'
-import { Settings as SettingsIcon, Info, ShieldAlert, Cpu, Network } from 'lucide-react'
+import { Info, ShieldAlert, Cpu, Network } from 'lucide-react'
 import { useStacks } from '@/hooks/useStacks'
 import { useAuth } from '@/hooks/useAuth'
 
 const SettingsPage: React.FC = () => {
-    const { getProtocolConfig } = useStacks()
-    const { isConnected } = useAuth()
+    const { } = useStacks()
+    const { } = useAuth()
 
     const [loading, setLoading] = useState(true)
     const [config, setConfig] = useState<any>(null)
