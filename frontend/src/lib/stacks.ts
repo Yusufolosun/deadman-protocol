@@ -1,8 +1,8 @@
-import { StacksMainnet, StacksTestnet } from '@stacks/network'
+import { STACKS_MAINNET, STACKS_TESTNET } from '@stacks/network'
 
 export const getNetwork = () => {
     const networkType = import.meta.env.VITE_NETWORK || 'testnet'
-    return networkType === 'mainnet' ? new StacksMainnet() : new StacksTestnet()
+    return networkType === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET
 }
 
 export const getContractOwnerAddress = () => {
@@ -11,5 +11,5 @@ export const getContractOwnerAddress = () => {
 
 export const APP_DETAILS = {
     name: 'Deadman Protocol',
-    icon: window.location.origin + '/logo.svg', // Will add logo later
+    icon: typeof window !== 'undefined' ? window.location.origin + '/logo.svg' : '',
 }
