@@ -52,7 +52,7 @@ export const pingActivity = () => {
 // --- delegation-registry ---
 
 export const submitApproval = (vaultId: number) => {
-    return getContractCallParams(CONTRACTS.DELEGATION_REGISTRY, 'submit-approval', [uintCV(vaultId)])
+    return getContractCallParams(CONTRACTS.VAULT_CORE, 'submit-approval', [uintCV(vaultId)])
 }
 
 export const addCosigner = (vaultId: number, cosigner: string) => {
