@@ -18,6 +18,10 @@
     transform: none !important;
 }
 
+.btn-full {
+    width: 100%;
+}
+
 /* Variants */
 .btn-primary {
     background: var(--primary);
