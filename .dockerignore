@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.env
+.env.*
+!.env.example
+*.seed
+*.pem
+*.key
+wallet.json
+mnemonic.txt
+settings/
+deployments/
+tmp/
+coverage/
+.clarinet/
