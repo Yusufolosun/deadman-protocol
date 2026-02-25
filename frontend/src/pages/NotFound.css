@@ -1,0 +1,15 @@
+.not-found-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 60vh;
+    padding: var(--spacing-xl, 2rem);
+    gap: var(--spacing-md, 1rem);
+}
+
+.not-found-icon {
+    color: var(--color-warning, #f59e0b);
+    opacity: 0.8;
+}
