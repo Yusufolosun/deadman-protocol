@@ -1,0 +1,54 @@
+.vault-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md, 1rem);
+}
+
+.vault-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.vault-card-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.vault-card-detail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vault-card-label {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary, #888);
+}
+
+.vault-card-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.vault-card-footer {
+    margin-top: var(--spacing-md, 1rem);
+    padding-top: var(--spacing-sm, 0.5rem);
+    border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+}
+
+.vault-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--color-primary, #6366f1);
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.vault-card-link:hover {
+    opacity: 0.8;
+}
