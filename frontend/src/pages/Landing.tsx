@@ -91,12 +91,16 @@ const Landing: React.FC = () => {
                     </div>
                     <div className="trust-stats">
                         <div className="stat-item">
-                            <span className="stat-value">6+</span>
+                            <span className="stat-value">14</span>
                             <span className="stat-label">Clarity Contracts</span>
                         </div>
                         <div className="stat-item">
                             <span className="stat-value">0</span>
                             <span className="stat-label">Off-Chain Oracles</span>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-value">3</span>
+                            <span className="stat-label">Condition Types</span>
                         </div>
                     </div>
                 </div>
