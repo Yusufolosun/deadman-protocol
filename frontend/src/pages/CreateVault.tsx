@@ -31,7 +31,8 @@ const CreateVault: React.FC = () => {
     const validateStep1 = (): boolean => {
         const errs: Record<string, string> = {}
         if (!formData.name.trim()) errs.name = 'Vault name is required.'
-        if (!isValidAmount(formData.amount)) errs.amount = 'Amount must be a positive number.'
+        const amountResult = isValidAmount(formData.amount)
+        if (!amountResult.valid) errs.amount = amountResult.error || 'Amount must be a positive number.'
         setErrors(errs)
         return Object.keys(errs).length === 0
     }
@@ -40,11 +41,14 @@ const CreateVault: React.FC = () => {
         const errs: Record<string, string> = {}
         const type = formData.conditionType
         if (type === '1') {
-            if (!isValidBlockHeight(formData.targetBlock)) errs.targetBlock = 'Target block must be a positive integer.'
+            const result = isValidBlockHeight(formData.targetBlock)
+            if (!result.valid) errs.targetBlock = result.error || 'Target block must be a positive integer.'
         } else if (type === '2') {
-            if (!isValidInactivityThreshold(formData.inactivityBlocks)) errs.inactivityBlocks = 'Inactivity threshold must be at least 144 blocks (~1 day).'
+            const result = isValidInactivityThreshold(formData.inactivityBlocks, 144)
+            if (!result.valid) errs.inactivityBlocks = result.error || 'Inactivity threshold must be at least 144 blocks (~1 day).'
         } else if (type === '3') {
-            if (!isValidThreshold(formData.threshold)) errs.threshold = 'Required approvals must be at least 1.'
+            const result = isValidThreshold(formData.threshold, formData.cosigners.filter(c => c.trim()).length || 10)
+            if (!result.valid) errs.threshold = result.error || 'Required approvals must be at least 1.'
         }
         setErrors(errs)
         return Object.keys(errs).length === 0
