@@ -1,7 +1,7 @@
-;; deadman-vault-core
-;; Primary entry point for the Deadman Protocol.
+;; deadman-vault-core-v2
+;; Primary entry point for the Deadman Protocol (V2).
 ;; Users create vaults, configure conditions, deposit STX, and trigger releases here.
-;; Orchestrates all other contracts.
+;; Orchestrates delegation, fee collection, and vault registration.
 ;; STX is held by this contract and released directly to beneficiaries.
 
 (define-constant ERR-PAUSED (err u601))
@@ -61,8 +61,14 @@
               (>= inactivity-blocks min-lock)
               (> required-threshold u0)))
       ERR-LOCK-TOO-SHORT)
+    ;; Collect protocol fee (charged on top of deposit)
+    (try! (contract-call? .deadman-fee-vault collect-fee amount))
+    ;; Transfer deposit to vault-core
     (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
-    (try! (contract-call? .delegation-registry set-beneficiary vault-id beneficiary tx-sender))
+    ;; Set beneficiary in delegation registry
+    (try! (contract-call? .deadman-delegation-registry-v2 set-beneficiary vault-id beneficiary tx-sender))
+    ;; Register vault in global registry
+    (try! (contract-call? .deadman-vault-registry register-vault vault-id tx-sender beneficiary))
     ;; Auto-ping for inactivity vaults so the countdown starts from creation
     (if (is-eq condition-type u2)
         (begin (unwrap-panic (contract-call? .activity-tracker ping)) true)
@@ -91,14 +97,14 @@
     (max-cosigners (get max-cosigners (contract-call? .admin-config get-config))))
     (asserts! (is-eq tx-sender (get owner vault)) ERR-NOT-VAULT-OWNER)
     (asserts! (is-eq (get status vault) STATUS-ACTIVE) ERR-NOT-ACTIVE)
-    (contract-call? .delegation-registry add-cosigner vault-id cosigner tx-sender max-cosigners)))
+    (contract-call? .deadman-delegation-registry-v2 add-cosigner vault-id cosigner tx-sender max-cosigners)))
 
 ;; --- Submit Co-signer Approval ---
 
 (define-public (submit-approval (vault-id uint))
   (begin
     (asserts! (is-some (map-get? vaults vault-id)) ERR-VAULT-NOT-FOUND)
-    (contract-call? .delegation-registry submit-approval vault-id)))
+    (contract-call? .deadman-delegation-registry-v2 submit-approval vault-id)))
 
 ;; --- Trigger Release ---
 ;; Transfers STX directly from this contract to the beneficiary.
@@ -106,7 +112,7 @@
 (define-public (trigger-release (vault-id uint))
   (let (
     (vault (unwrap! (map-get? vaults vault-id) ERR-VAULT-NOT-FOUND))
-    (approval-count (contract-call? .delegation-registry get-approval-count vault-id))
+    (approval-count (contract-call? .deadman-delegation-registry-v2 get-approval-count vault-id))
     (condition-met (unwrap! (contract-call? .condition-engine evaluate-condition
         (get condition-type vault)
         (get owner vault)
@@ -115,10 +121,12 @@
         approval-count
         (get required-threshold vault))
       ERR-INVALID-CONDITION))
-    (beneficiary (unwrap! (contract-call? .delegation-registry get-beneficiary vault-id) ERR-NO-BENEFICIARY)))
+    (beneficiary (unwrap! (contract-call? .deadman-delegation-registry-v2 get-beneficiary vault-id) ERR-NO-BENEFICIARY)))
     (asserts! (is-eq (get status vault) STATUS-ACTIVE) ERR-NOT-ACTIVE)
     (asserts! condition-met ERR-CONDITIONS-NOT-MET)
     (map-set vaults vault-id (merge vault { status: STATUS-RELEASED }))
+    ;; Update vault registry
+    (try! (contract-call? .deadman-vault-registry update-vault-status vault-id STATUS-RELEASED))
     (match (as-contract (stx-transfer? (get amount vault) tx-sender beneficiary))
       success (begin
         (print { event: "vault-released", vault-id: vault-id, beneficiary: beneficiary, amount: (get amount vault) })
@@ -132,6 +140,8 @@
     (asserts! (is-eq tx-sender (get owner vault)) ERR-NOT-VAULT-OWNER)
     (asserts! (is-eq (get status vault) STATUS-ACTIVE) ERR-NOT-ACTIVE)
     (map-set vaults vault-id (merge vault { status: STATUS-CANCELLED }))
+    ;; Update vault registry
+    (try! (contract-call? .deadman-vault-registry update-vault-status vault-id STATUS-CANCELLED))
     (match (as-contract (stx-transfer? (get amount vault) tx-sender (get owner vault)))
       success (begin
         (print { event: "vault-cancelled", vault-id: vault-id, owner: (get owner vault) })

@@ -8,11 +8,11 @@ const wallet2 = accounts.get("wallet_2")!;
 const wallet3 = accounts.get("wallet_3")!;
 const wallet4 = accounts.get("wallet_4")!;
 
-describe("delegation-registry", () => {
+describe("deadman-delegation-registry-v2", () => {
   describe("set-authorized-caller", () => {
     it("allows deployer to set authorized caller", () => {
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-authorized-caller",
         [Cl.principal(wallet1)],
         deployer
@@ -22,7 +22,7 @@ describe("delegation-registry", () => {
 
     it("rejects non-deployer callers", () => {
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-authorized-caller",
         [Cl.principal(wallet1)],
         wallet1
@@ -34,7 +34,7 @@ describe("delegation-registry", () => {
   describe("set-beneficiary", () => {
     it("allows deployer to set beneficiary for a vault", () => {
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         deployer
@@ -44,7 +44,7 @@ describe("delegation-registry", () => {
 
     it("prevents self-delegation", () => {
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet1), Cl.principal(wallet1)],
         deployer
@@ -54,7 +54,7 @@ describe("delegation-registry", () => {
 
     it("rejects unauthorized callers", () => {
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         wallet3
@@ -66,7 +66,7 @@ describe("delegation-registry", () => {
   describe("get-beneficiary", () => {
     it("returns none for vault with no beneficiary", () => {
       const result = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "get-beneficiary",
         [Cl.uint(999)],
         deployer
@@ -76,13 +76,13 @@ describe("delegation-registry", () => {
 
     it("returns the beneficiary after setting it", () => {
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         deployer
       );
       const result = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "get-beneficiary",
         [Cl.uint(1)],
         deployer
@@ -94,7 +94,7 @@ describe("delegation-registry", () => {
   describe("add-cosigner", () => {
     it("allows adding a cosigner", () => {
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
@@ -104,20 +104,20 @@ describe("delegation-registry", () => {
 
     it("increments cosigner count", () => {
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
 
       const result = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "get-cosigner-count",
         [Cl.uint(1)],
         deployer
@@ -127,7 +127,7 @@ describe("delegation-registry", () => {
 
     it("prevents self-delegation as cosigner", () => {
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet1), Cl.principal(wallet1), Cl.uint(5)],
         deployer
@@ -138,20 +138,20 @@ describe("delegation-registry", () => {
     it("rejects when max cosigners reached", () => {
       // Add 2 cosigners with max of 2
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(2)],
         deployer
       );
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3), Cl.principal(wallet1), Cl.uint(2)],
         deployer
       );
       // Third should fail
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet4), Cl.principal(wallet1), Cl.uint(2)],
         deployer
@@ -161,14 +161,14 @@ describe("delegation-registry", () => {
 
     it("rejects duplicate cosigner", () => {
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
       // Adding the same cosigner again should fail
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
@@ -180,7 +180,7 @@ describe("delegation-registry", () => {
   describe("is-cosigner", () => {
     it("returns false for non-cosigner", () => {
       const result = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "is-cosigner",
         [Cl.uint(1), Cl.principal(wallet4)],
         deployer
@@ -190,13 +190,13 @@ describe("delegation-registry", () => {
 
     it("returns true for registered cosigner", () => {
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
       const result = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "is-cosigner",
         [Cl.uint(1), Cl.principal(wallet2)],
         deployer
@@ -208,7 +208,7 @@ describe("delegation-registry", () => {
   describe("get-cosigner", () => {
     it("returns none for empty slot", () => {
       const result = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "get-cosigner",
         [Cl.uint(1), Cl.uint(0)],
         deployer
@@ -218,26 +218,26 @@ describe("delegation-registry", () => {
 
     it("returns cosigner at the correct index", () => {
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
       const first = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "get-cosigner",
         [Cl.uint(1), Cl.uint(0)],
         deployer
       );
       expect(first.result).toBeSome(Cl.principal(wallet2));
       const second = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "get-cosigner",
         [Cl.uint(1), Cl.uint(1)],
         deployer
@@ -250,13 +250,13 @@ describe("delegation-registry", () => {
     it("allows a registered cosigner to approve", () => {
       // Add wallet2 as cosigner for vault 1
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet2
@@ -266,7 +266,7 @@ describe("delegation-registry", () => {
 
     it("rejects non-cosigner approval", () => {
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet4
@@ -276,19 +276,19 @@ describe("delegation-registry", () => {
 
     it("rejects duplicate approval", () => {
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet2
       );
       const result = simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet2
@@ -298,22 +298,22 @@ describe("delegation-registry", () => {
 
     it("increments approval count", () => {
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
-      simnet.callPublicFn("delegation-registry", "submit-approval", [Cl.uint(1)], wallet2);
-      simnet.callPublicFn("delegation-registry", "submit-approval", [Cl.uint(1)], wallet3);
+      simnet.callPublicFn("deadman-delegation-registry-v2", "submit-approval", [Cl.uint(1)], wallet2);
+      simnet.callPublicFn("deadman-delegation-registry-v2", "submit-approval", [Cl.uint(1)], wallet3);
 
       const result = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "get-approval-count",
         [Cl.uint(1)],
         deployer
@@ -325,7 +325,7 @@ describe("delegation-registry", () => {
   describe("has-approved", () => {
     it("returns false before approval", () => {
       const result = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "has-approved",
         [Cl.uint(1), Cl.principal(wallet2)],
         deployer
@@ -335,15 +335,15 @@ describe("delegation-registry", () => {
 
     it("returns true after approval", () => {
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
         deployer
       );
-      simnet.callPublicFn("delegation-registry", "submit-approval", [Cl.uint(1)], wallet2);
+      simnet.callPublicFn("deadman-delegation-registry-v2", "submit-approval", [Cl.uint(1)], wallet2);
 
       const result = simnet.callReadOnlyFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "has-approved",
         [Cl.uint(1), Cl.principal(wallet2)],
         deployer

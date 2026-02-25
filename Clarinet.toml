@@ -5,18 +5,10 @@ authors = []
 telemetry = true
 cache_dir = "./.cache"
 
-[contracts.deadman-vault-core]
-path = "contracts/deadman-vault-core.clar"
-clarity_version = 2
-epoch = "2.5"
+# --- Unchanged contracts (no redeployment needed) ---
 
-[contracts.condition-engine]
-path = "contracts/condition-engine.clar"
-clarity_version = 2
-epoch = "2.5"
-
-[contracts.delegation-registry]
-path = "contracts/delegation-registry.clar"
+[contracts.admin-config]
+path = "contracts/admin-config.clar"
 clarity_version = 2
 epoch = "2.5"
 
@@ -25,24 +17,72 @@ path = "contracts/activity-tracker.clar"
 clarity_version = 2
 epoch = "2.5"
 
-[contracts.release-handler]
-path = "contracts/release-handler.clar"
+[contracts.condition-engine]
+path = "contracts/condition-engine.clar"
 clarity_version = 2
 epoch = "2.5"
 
-[contracts.admin-config]
-path = "contracts/admin-config.clar"
+# --- New contracts ---
+
+[contracts.deadman-time-utils]
+path = "contracts/deadman-time-utils.clar"
+clarity_version = 2
+epoch = "2.5"
+
+[contracts.deadman-access-control]
+path = "contracts/deadman-access-control.clar"
+clarity_version = 2
+epoch = "2.5"
+
+[contracts.deadman-fee-vault]
+path = "contracts/deadman-fee-vault.clar"
+clarity_version = 2
+epoch = "2.5"
+
+[contracts.deadman-notification-logger]
+path = "contracts/deadman-notification-logger.clar"
+clarity_version = 2
+epoch = "2.5"
+
+[contracts.deadman-vault-registry]
+path = "contracts/deadman-vault-registry.clar"
+clarity_version = 2
+epoch = "2.5"
+
+[contracts.deadman-emergency-stop]
+path = "contracts/deadman-emergency-stop.clar"
+clarity_version = 2
+epoch = "2.5"
+
+# --- V2 redeployments (modified contracts) ---
+
+[contracts.deadman-delegation-registry-v2]
+path = "contracts/deadman-delegation-registry-v2.clar"
+clarity_version = 2
+epoch = "2.5"
+
+[contracts.deadman-release-handler-v2]
+path = "contracts/deadman-release-handler-v2.clar"
+clarity_version = 2
+epoch = "2.5"
+
+[contracts.deadman-vault-core-v2]
+path = "contracts/deadman-vault-core-v2.clar"
+clarity_version = 2
+epoch = "2.5"
+
+# --- Contracts that depend on vault-core-v2 ---
+
+[contracts.deadman-vault-extensions]
+path = "contracts/deadman-vault-extensions.clar"
+clarity_version = 2
+epoch = "2.5"
+
+[contracts.deadman-recovery]
+path = "contracts/deadman-recovery.clar"
 clarity_version = 2
 epoch = "2.5"
 
 [repl.analysis]
 passes = ["check_checker"]
 check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }
-
-# Check-checker settings:
-# trusted_sender: if true, inputs are trusted after tx_sender has been checked.
-# trusted_caller: if true, inputs are trusted after contract-caller has been checked.
-# callee_filter: if true, untrusted data may be passed into a private function without a
-# warning, if it gets checked inside. This check will also propagate up to the
-# caller.
-# More informations: https://www.hiro.so/blog/new-safety-checks-in-clarinet

@@ -9,15 +9,33 @@ const wallet3 = accounts.get("wallet_3")!;
 const wallet4 = accounts.get("wallet_4")!;
 const wallet5 = accounts.get("wallet_5")!;
 
-const vaultCorePrincipal = `${deployer}.deadman-vault-core`;
+const vaultCorePrincipal = `${deployer}.deadman-vault-core-v2`;
 
-// Set vault-core as the authorized caller for delegation-registry
-// so that cross-contract calls pass authorization
+// Set vault-core-v2 as the authorized caller for all dependent contracts
 function setupAuthorizedCallers() {
   simnet.callPublicFn(
-    "delegation-registry",
+    "deadman-delegation-registry-v2",
     "set-authorized-caller",
     [Cl.principal(vaultCorePrincipal)],
+    deployer
+  );
+  simnet.callPublicFn(
+    "deadman-fee-vault",
+    "set-authorized-caller",
+    [Cl.principal(vaultCorePrincipal)],
+    deployer
+  );
+  simnet.callPublicFn(
+    "deadman-vault-registry",
+    "set-authorized-caller",
+    [Cl.principal(vaultCorePrincipal)],
+    deployer
+  );
+  // Set fee rate to 0 for vault-core tests to isolate fee behavior
+  simnet.callPublicFn(
+    "deadman-fee-vault",
+    "set-fee-rate",
+    [Cl.uint(0)],
     deployer
   );
 }
@@ -30,7 +48,7 @@ function createBlockHeightVault(
   beneficiary: string
 ) {
   return simnet.callPublicFn(
-    "deadman-vault-core",
+    "deadman-vault-core-v2",
     "create-vault",
     [
       Cl.uint(amount),
@@ -52,7 +70,7 @@ function createInactivityVault(
   beneficiary: string
 ) {
   return simnet.callPublicFn(
-    "deadman-vault-core",
+    "deadman-vault-core-v2",
     "create-vault",
     [
       Cl.uint(amount),
@@ -74,7 +92,7 @@ function createThresholdVault(
   beneficiary: string
 ) {
   return simnet.callPublicFn(
-    "deadman-vault-core",
+    "deadman-vault-core-v2",
     "create-vault",
     [
       Cl.uint(amount),
@@ -88,7 +106,7 @@ function createThresholdVault(
   );
 }
 
-describe("deadman-vault-core", () => {
+describe("deadman-vault-core-v2", () => {
   beforeEach(() => {
     setupAuthorizedCallers();
   });
@@ -135,7 +153,7 @@ describe("deadman-vault-core", () => {
 
     it("rejects invalid condition type u0", () => {
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "create-vault",
         [
           Cl.uint(1000000),
@@ -152,7 +170,7 @@ describe("deadman-vault-core", () => {
 
     it("rejects invalid condition type u4", () => {
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "create-vault",
         [
           Cl.uint(1000000),
@@ -235,7 +253,7 @@ describe("deadman-vault-core", () => {
   describe("get-vault", () => {
     it("returns none for non-existent vault", () => {
       const result = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-vault",
         [Cl.uint(999)],
         deployer
@@ -247,7 +265,7 @@ describe("deadman-vault-core", () => {
       const targetBlock = simnet.blockHeight + 200;
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
       const result = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-vault",
         [Cl.uint(1)],
         deployer
@@ -270,7 +288,7 @@ describe("deadman-vault-core", () => {
   describe("get-next-vault-id", () => {
     it("starts at 1", () => {
       const result = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-next-vault-id",
         [],
         deployer
@@ -283,7 +301,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-next-vault-id",
         [],
         deployer
@@ -295,7 +313,7 @@ describe("deadman-vault-core", () => {
   describe("owner vault index", () => {
     it("returns zero count for owner with no vaults", () => {
       const result = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-owner-vault-count",
         [Cl.principal(wallet1)],
         deployer
@@ -309,7 +327,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 2000000, simnet.blockHeight + 200, wallet3);
 
       const count = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-owner-vault-count",
         [Cl.principal(wallet1)],
         deployer
@@ -323,7 +341,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 2000000, simnet.blockHeight + 200, wallet3);
 
       const first = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-owner-vault-id",
         [Cl.principal(wallet1), Cl.uint(0)],
         deployer
@@ -331,7 +349,7 @@ describe("deadman-vault-core", () => {
       expect(first.result).toBeSome(Cl.uint(1));
 
       const second = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-owner-vault-id",
         [Cl.principal(wallet1), Cl.uint(1)],
         deployer
@@ -341,7 +359,7 @@ describe("deadman-vault-core", () => {
 
     it("returns none for out-of-bounds index", () => {
       const result = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-owner-vault-id",
         [Cl.principal(wallet1), Cl.uint(99)],
         deployer
@@ -355,7 +373,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet3, 2000000, simnet.blockHeight + 200, wallet4);
 
       const count1 = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-owner-vault-count",
         [Cl.principal(wallet1)],
         deployer
@@ -363,7 +381,7 @@ describe("deadman-vault-core", () => {
       expect(count1.result).toBeUint(1);
 
       const count3 = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-owner-vault-count",
         [Cl.principal(wallet3)],
         deployer
@@ -378,7 +396,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3)],
         wallet1
@@ -391,7 +409,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3)],
         wallet2
@@ -401,7 +419,7 @@ describe("deadman-vault-core", () => {
 
     it("rejects cosigner for non-existent vault", () => {
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(999), Cl.principal(wallet3)],
         wallet1
@@ -414,7 +432,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet1)],
         wallet1
@@ -428,13 +446,13 @@ describe("deadman-vault-core", () => {
       const targetBlock = simnet.blockHeight + 200;
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3)],
         wallet1
       );
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet3
@@ -444,7 +462,7 @@ describe("deadman-vault-core", () => {
 
     it("rejects approval for non-existent vault", () => {
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(999)],
         wallet1
@@ -457,7 +475,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet4
@@ -472,7 +490,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "cancel-vault",
         [Cl.uint(1)],
         wallet1
@@ -485,7 +503,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "cancel-vault",
         [Cl.uint(1)],
         wallet2
@@ -495,7 +513,7 @@ describe("deadman-vault-core", () => {
 
     it("rejects cancelling non-existent vault", () => {
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "cancel-vault",
         [Cl.uint(999)],
         wallet1
@@ -508,14 +526,14 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "cancel-vault",
         [Cl.uint(1)],
         wallet1
       );
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "cancel-vault",
         [Cl.uint(1)],
         wallet1
@@ -539,7 +557,7 @@ describe("deadman-vault-core", () => {
       expect(stxAfterDeposit).toBeLessThan(stxBefore);
 
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "cancel-vault",
         [Cl.uint(1)],
         wallet1
@@ -556,7 +574,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "cancel-vault",
         [Cl.uint(1)],
         wallet1
@@ -572,7 +590,7 @@ describe("deadman-vault-core", () => {
   describe("trigger-release", () => {
     it("rejects release for non-existent vault", () => {
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(999)],
         wallet1
@@ -585,14 +603,14 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "cancel-vault",
         [Cl.uint(1)],
         wallet1
       );
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -605,7 +623,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -617,13 +635,13 @@ describe("deadman-vault-core", () => {
       createThresholdVault(wallet1, 1000000, 2, wallet2);
 
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3)],
         wallet1
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet4)],
         wallet1
@@ -631,14 +649,14 @@ describe("deadman-vault-core", () => {
 
       // Only 1 approval, need 2
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet3
       );
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -655,7 +673,7 @@ describe("deadman-vault-core", () => {
       simnet.mineEmptyBlocks(blocksNeeded);
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -668,32 +686,32 @@ describe("deadman-vault-core", () => {
 
       // Add 2 cosigners and get 2 approvals
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3)],
         wallet1
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet4)],
         wallet1
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet3
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet4
       );
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -706,20 +724,20 @@ describe("deadman-vault-core", () => {
 
       // Add cosigner and approve
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3)],
         wallet1
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet3
       );
 
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -727,7 +745,7 @@ describe("deadman-vault-core", () => {
 
       // Verify vault is marked as released
       const vault = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-vault",
         [Cl.uint(1)],
         deployer
@@ -743,13 +761,13 @@ describe("deadman-vault-core", () => {
 
       // Add cosigner and approve
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3)],
         wallet1
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet3
@@ -757,7 +775,7 @@ describe("deadman-vault-core", () => {
 
       // First release succeeds
       const first = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -766,7 +784,7 @@ describe("deadman-vault-core", () => {
 
       // Second release fails
       const second = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -783,20 +801,20 @@ describe("deadman-vault-core", () => {
 
       // Add cosigner and approve
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3)],
         wallet1
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet3
       );
 
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -812,20 +830,20 @@ describe("deadman-vault-core", () => {
       createThresholdVault(wallet1, 1000000, 1, wallet2);
 
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(1), Cl.principal(wallet3)],
         wallet1
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(1)],
         wallet3
       );
 
       const result = simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(1)],
         wallet1
@@ -842,7 +860,7 @@ describe("deadman-vault-core", () => {
   describe("vault status", () => {
     it("get-vault-status returns none for non-existent vault", () => {
       const result = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-vault-status",
         [Cl.uint(999)],
         deployer
@@ -855,7 +873,7 @@ describe("deadman-vault-core", () => {
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
       const result = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-vault-status",
         [Cl.uint(1)],
         deployer
@@ -870,7 +888,7 @@ describe("deadman-vault-core", () => {
 
       // Cancel vault 1
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "cancel-vault",
         [Cl.uint(1)],
         wallet1
@@ -878,19 +896,19 @@ describe("deadman-vault-core", () => {
 
       // Release vault 2
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "add-cosigner",
         [Cl.uint(2), Cl.principal(wallet4)],
         wallet1
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "submit-approval",
         [Cl.uint(2)],
         wallet4
       );
       simnet.callPublicFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "trigger-release",
         [Cl.uint(2)],
         wallet1
@@ -898,7 +916,7 @@ describe("deadman-vault-core", () => {
 
       // Vault 1 should be cancelled (status 2)
       const status1 = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-vault-status",
         [Cl.uint(1)],
         deployer
@@ -907,7 +925,7 @@ describe("deadman-vault-core", () => {
 
       // Vault 2 should be released (status 1)
       const status2 = simnet.callReadOnlyFn(
-        "deadman-vault-core",
+        "deadman-vault-core-v2",
         "get-vault-status",
         [Cl.uint(2)],
         deployer

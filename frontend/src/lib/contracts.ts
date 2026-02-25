@@ -3,12 +3,20 @@ import { getNetwork, getContractOwnerAddress } from './stacks'
 
 // Contract Names
 export const CONTRACTS = {
-    VAULT_CORE: 'deadman-vault-core',
+    VAULT_CORE: 'deadman-vault-core-v2',
     CONDITION_ENGINE: 'condition-engine',
-    DELEGATION_REGISTRY: 'delegation-registry',
+    DELEGATION_REGISTRY: 'deadman-delegation-registry-v2',
     ACTIVITY_TRACKER: 'activity-tracker',
-    RELEASE_HANDLER: 'release-handler',
+    RELEASE_HANDLER: 'deadman-release-handler-v2',
     ADMIN_CONFIG: 'admin-config',
+    FEE_VAULT: 'deadman-fee-vault',
+    VAULT_REGISTRY: 'deadman-vault-registry',
+    NOTIFICATION_LOGGER: 'deadman-notification-logger',
+    VAULT_EXTENSIONS: 'deadman-vault-extensions',
+    TIME_UTILS: 'deadman-time-utils',
+    ACCESS_CONTROL: 'deadman-access-control',
+    EMERGENCY_STOP: 'deadman-emergency-stop',
+    RECOVERY: 'deadman-recovery',
 }
 
 // Utility to create contract call objects

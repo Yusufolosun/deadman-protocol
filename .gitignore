@@ -31,6 +31,12 @@ mnemonic.txt
 __pycache__/
 
 # -----------------------------------------------
+# Temporary deployment scripts
+# Contains deployment logic — delete after use
+# -----------------------------------------------
+tmp/
+
+# -----------------------------------------------
 # Node / Frontend dependencies and build output
 # -----------------------------------------------
 node_modules/

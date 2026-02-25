@@ -7,13 +7,13 @@ const wallet1 = accounts.get("wallet_1")!;
 const wallet2 = accounts.get("wallet_2")!;
 const wallet3 = accounts.get("wallet_3")!;
 
-const releaseHandlerContract = `${deployer}.release-handler`;
+const releaseHandlerContract = `${deployer}.deadman-release-handler-v2`;
 
-describe("release-handler", () => {
+describe("deadman-release-handler-v2", () => {
   describe("set-authorized-caller", () => {
     it("allows deployer to set authorized caller", () => {
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "set-authorized-caller",
         [Cl.principal(wallet1)],
         deployer
@@ -23,7 +23,7 @@ describe("release-handler", () => {
 
     it("rejects non-deployer callers", () => {
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "set-authorized-caller",
         [Cl.principal(wallet2)],
         wallet1
@@ -33,13 +33,13 @@ describe("release-handler", () => {
 
     it("allows updating authorized caller multiple times", () => {
       simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "set-authorized-caller",
         [Cl.principal(wallet1)],
         deployer
       );
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "set-authorized-caller",
         [Cl.principal(wallet2)],
         deployer
@@ -51,7 +51,7 @@ describe("release-handler", () => {
   describe("execute-release", () => {
     it("rejects when no beneficiary is set", () => {
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "execute-release",
         [Cl.uint(999), Cl.uint(1000)],
         deployer
@@ -62,13 +62,13 @@ describe("release-handler", () => {
     it("rejects unauthorized callers", () => {
       // Set beneficiary first so we get past the beneficiary check
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         deployer
       );
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "execute-release",
         [Cl.uint(1), Cl.uint(1000)],
         wallet3
@@ -79,13 +79,13 @@ describe("release-handler", () => {
     it("rejects zero amount", () => {
       // Set beneficiary
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         deployer
       );
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "execute-release",
         [Cl.uint(1), Cl.uint(0)],
         deployer
@@ -96,13 +96,13 @@ describe("release-handler", () => {
     it("fails transfer when contract has no STX balance", () => {
       // Set beneficiary
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         deployer
       );
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "execute-release",
         [Cl.uint(1), Cl.uint(1000000)],
         deployer
@@ -113,7 +113,7 @@ describe("release-handler", () => {
     it("successfully releases STX when contract has sufficient balance", () => {
       // Set beneficiary for vault 1
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         deployer
@@ -129,7 +129,7 @@ describe("release-handler", () => {
 
       // Execute release
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "execute-release",
         [Cl.uint(1), Cl.uint(3000000)],
         deployer
@@ -140,7 +140,7 @@ describe("release-handler", () => {
     it("emits release event with correct data", () => {
       // Set beneficiary
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         deployer
@@ -151,7 +151,7 @@ describe("release-handler", () => {
 
       // Execute release
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "execute-release",
         [Cl.uint(1), Cl.uint(2000000)],
         deployer
@@ -168,7 +168,7 @@ describe("release-handler", () => {
     it("works when called by authorized caller", () => {
       // Set wallet3 as authorized caller
       simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "set-authorized-caller",
         [Cl.principal(wallet3)],
         deployer
@@ -176,7 +176,7 @@ describe("release-handler", () => {
 
       // Set beneficiary
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         deployer
@@ -187,7 +187,7 @@ describe("release-handler", () => {
 
       // wallet3 should be able to call execute-release
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "execute-release",
         [Cl.uint(1), Cl.uint(1000000)],
         wallet3
@@ -198,7 +198,7 @@ describe("release-handler", () => {
     it("fails when amount exceeds contract balance", () => {
       // Set beneficiary
       simnet.callPublicFn(
-        "delegation-registry",
+        "deadman-delegation-registry-v2",
         "set-beneficiary",
         [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1)],
         deployer
@@ -209,7 +209,7 @@ describe("release-handler", () => {
 
       // Try to release more than the balance
       const result = simnet.callPublicFn(
-        "release-handler",
+        "deadman-release-handler-v2",
         "execute-release",
         [Cl.uint(1), Cl.uint(5000)],
         deployer

@@ -1,7 +1,6 @@
-;; release-handler
+;; deadman-release-handler-v2
 ;; Standalone STX release utility.
-;; NOTE: As of the architecture update, deadman-vault-core transfers STX
-;; directly to beneficiaries using its own as-contract balance.
+;; NOTE: As of V2, deadman-vault-core-v2 transfers STX directly to beneficiaries.
 ;; This contract is retained for standalone use and potential future extensions
 ;; (e.g. partial releases, multi-token support).
 ;; Emits a structured release event on success.
@@ -28,9 +27,8 @@
 ;; --- Release Execution ---
 
 ;; Transfers STX from the contract's balance to the beneficiary.
-;; Only callable by deadman-vault-core after condition verification.
 (define-public (execute-release (vault-id uint) (amount uint))
-  (let ((beneficiary (unwrap! (contract-call? .delegation-registry get-beneficiary vault-id) ERR-NO-BENEFICIARY)))
+  (let ((beneficiary (unwrap! (contract-call? .deadman-delegation-registry-v2 get-beneficiary vault-id) ERR-NO-BENEFICIARY)))
     (asserts! (is-authorized) ERR-NOT-AUTHORIZED)
     (asserts! (> amount u0) ERR-ZERO-AMOUNT)
     (match (as-contract (stx-transfer? amount tx-sender beneficiary))
