@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import './Navbar.css'
 import { Link, useLocation } from 'react-router-dom'
 import { Shield, LayoutDashboard, PlusCircle, Activity as ActivityIcon, Wallet, LogOut, ChevronDown, CheckCircle, Settings } from 'lucide-react'
@@ -8,6 +8,20 @@ const Navbar: React.FC = () => {
     const location = useLocation()
     const { isConnected, userData, connect, disconnect } = useAuth()
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+    const dropdownRef = useRef<HTMLDivElement>(null)
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false)
+            }
+        }
+        if (isDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside)
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [isDropdownOpen])
 
     const navItems = [
         { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
@@ -45,7 +59,7 @@ const Navbar: React.FC = () => {
 
                 <div className="navbar-actions">
                     {isConnected ? (
-                        <div className="user-menu">
+                        <div className="user-menu" ref={dropdownRef}>
                             <button
                                 className="address-badge glow-on-hover"
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
