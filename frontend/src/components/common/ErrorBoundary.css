@@ -1,0 +1,23 @@
+.error-boundary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl, 2rem);
+    text-align: center;
+    min-height: 200px;
+}
+
+.error-boundary-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 var(--spacing-sm, 0.5rem);
+    color: var(--color-error, #ef4444);
+}
+
+.error-boundary-message {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary, #888);
+    margin: 0 0 var(--spacing-md, 1rem);
+    max-width: 400px;
+}
