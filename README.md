@@ -148,6 +148,8 @@ Required variables:
 |---|---|
 | [Architecture](docs/ARCHITECTURE.md) | System design, contract interactions, data flow |
 | [API Reference](docs/API.md) | Complete smart contract function reference |
+| [Frontend Guide](docs/FRONTEND.md) | Frontend architecture, components, and design system |
+| [Testing Guide](docs/TESTING.md) | How to run and write tests |
 | [Deployment Guide](docs/DEPLOYMENT.md) | Testnet/mainnet deployment instructions |
 | [Contributing](CONTRIBUTING.md) | Development workflow and coding standards |
 | [Security Policy](SECURITY.md) | Vulnerability reporting guidelines |
