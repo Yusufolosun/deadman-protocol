@@ -1,15 +1,22 @@
-import React, { useState, useEffect } from 'react'
+import type React from 'react'
+import { useState, useEffect } from 'react'
 import './Settings.css'
 import Card from '@/components/common/Card'
 import Button from '@/components/common/Button'
+import Badge from '@/components/common/Badge'
 import Spinner from '@/components/common/Spinner'
-import { Info, ShieldAlert, Cpu, Network } from 'lucide-react'
+import AddressDisplay from '@/components/common/AddressDisplay'
+import { Info, ShieldAlert, Cpu, Network, ExternalLink } from 'lucide-react'
 import { useStacks } from '@/hooks/useStacks'
+import { useBlockHeight } from '@/hooks/useBlockHeight'
 import { getContractOwnerAddress, getNetworkName } from '@/lib/stacks'
+import { blocksToTime, formatBlockHeight } from '@/lib/format'
+import { LINKS } from '@/lib/constants'
 import type { ProtocolConfig } from '@/types'
 
 const SettingsPage: React.FC = () => {
     const { getProtocolConfig } = useStacks()
+    const { blockHeight } = useBlockHeight()
 
     const [loading, setLoading] = useState(true)
     const [config, setConfig] = useState<ProtocolConfig | null>(null)
@@ -72,7 +79,7 @@ const SettingsPage: React.FC = () => {
                                     <span>Minimum Lock Time</span>
                                     <p className="helper">Minimum block height for time-based pings.</p>
                                 </div>
-                                <strong>{config.minLockBlocks} Blocks</strong>
+                                <strong>{config.minLockBlocks} Blocks ({blocksToTime(config.minLockBlocks)})</strong>
                             </div>
                             <div className="config-item">
                                 <div className="item-label">
@@ -93,7 +100,7 @@ const SettingsPage: React.FC = () => {
                                     <span>Protocol Status</span>
                                     <p className="helper">Whether new vaults can be created.</p>
                                 </div>
-                                <strong>{config.paused ? 'Paused' : 'Active'}</strong>
+                                <Badge variant={config.paused ? 'error' : 'success'}>{config.paused ? 'Paused' : 'Active'}</Badge>
                             </div>
                         </div>
                     </Card>
@@ -107,8 +114,14 @@ const SettingsPage: React.FC = () => {
                             </div>
                             <div className="config-item">
                                 <span>Contract Owner</span>
-                                <code className="address-mini">{getContractOwnerAddress()}</code>
+                                <AddressDisplay address={getContractOwnerAddress()} />
                             </div>
+                            {blockHeight && (
+                                <div className="config-item">
+                                    <span>Current Block Height</span>
+                                    <strong>{formatBlockHeight(blockHeight)}</strong>
+                                </div>
+                            )}
                         </div>
                     </Card>
                 </section>
@@ -123,7 +136,9 @@ const SettingsPage: React.FC = () => {
                             The Deadman Protocol is currently in alpha. All code is public and open-source,
                             but has not yet undergone a formal security audit. Use with caution for large amounts of STX.
                         </p>
-                        <Button variant="ghost" size="sm" className="doc-link">Read Whitepaper</Button>
+                        <a href={LINKS.DOCS} target="_blank" rel="noopener noreferrer">
+                            <Button variant="ghost" size="sm" className="doc-link" rightIcon={<ExternalLink size={14} />}>Documentation</Button>
+                        </a>
                     </Card>
 
                     <Card className="help-card">
