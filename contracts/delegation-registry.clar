@@ -26,8 +26,8 @@
     (ok (var-set authorized-caller caller))))
 
 (define-private (is-authorized)
-  (or (is-eq tx-sender (var-get authorized-caller))
-      (is-eq tx-sender CONTRACT-OWNER)))
+  (or (is-eq contract-caller (var-get authorized-caller))
+      (is-eq contract-caller CONTRACT-OWNER)))
 
 ;; --- Co-signer Membership Check ---
 
