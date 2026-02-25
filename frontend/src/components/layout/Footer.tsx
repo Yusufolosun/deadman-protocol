@@ -1,6 +1,7 @@
 import React from 'react'
 import './Footer.css'
 import { Shield, Github, Twitter } from 'lucide-react'
+import { getNetworkName } from '@/lib/stacks'
 
 const Footer: React.FC = () => {
     return (
@@ -39,7 +40,7 @@ const Footer: React.FC = () => {
                 <p>&copy; {new Date().getFullYear()} Deadman Protocol. Built on Stacks.</p>
                 <div className="footer-badge">
                     <span className="dot"></span>
-                    Stacks Mainnet
+                    {getNetworkName()}
                 </div>
             </div>
         </footer>
