@@ -32,17 +32,45 @@ export const useStacks = () => {
     const getNextVaultId = () =>
         readOnly(CONTRACTS.VAULT_CORE, 'get-next-vault-id', [])
 
+    const getOwnerVaultCount = (owner: string) =>
+        readOnly(CONTRACTS.VAULT_CORE, 'get-owner-vault-count', [principalCV(owner)])
+
+    const getOwnerVaultId = (owner: string, index: number) =>
+        readOnly(CONTRACTS.VAULT_CORE, 'get-owner-vault-id', [principalCV(owner), uintCV(index)])
+
     const getLastActive = (address: string) =>
         readOnly(CONTRACTS.ACTIVITY_TRACKER, 'get-last-active', [principalCV(address)])
 
     const getProtocolConfig = () =>
         readOnly(CONTRACTS.ADMIN_CONFIG, 'get-config', [])
 
+    const getBeneficiary = (vaultId: number) =>
+        readOnly(CONTRACTS.DELEGATION_REGISTRY, 'get-beneficiary', [uintCV(vaultId)])
+
+    const getCosignerCount = (vaultId: number) =>
+        readOnly(CONTRACTS.DELEGATION_REGISTRY, 'get-cosigner-count', [uintCV(vaultId)])
+
+    const getCosigner = (vaultId: number, index: number) =>
+        readOnly(CONTRACTS.DELEGATION_REGISTRY, 'get-cosigner', [uintCV(vaultId), uintCV(index)])
+
+    const getApprovalCount = (vaultId: number) =>
+        readOnly(CONTRACTS.DELEGATION_REGISTRY, 'get-approval-count', [uintCV(vaultId)])
+
+    const hasApproved = (vaultId: number, cosigner: string) =>
+        readOnly(CONTRACTS.DELEGATION_REGISTRY, 'has-approved', [uintCV(vaultId), principalCV(cosigner)])
+
     return {
         getVault,
         getNextVaultId,
+        getOwnerVaultCount,
+        getOwnerVaultId,
         getLastActive,
         getProtocolConfig,
+        getBeneficiary,
+        getCosignerCount,
+        getCosigner,
+        getApprovalCount,
+        hasApproved,
         readOnly,
     }
 }
