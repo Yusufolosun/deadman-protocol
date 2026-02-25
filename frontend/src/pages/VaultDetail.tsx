@@ -3,55 +3,53 @@ import './VaultDetail.css'
 import { useParams, useNavigate } from 'react-router-dom'
 import Card from '@/components/common/Card'
 import Button from '@/components/common/Button'
-import Badge from '@/components/common/Badge'
 import Spinner from '@/components/common/Spinner'
+import { VaultStatusBadge, ConditionTypeBadge } from '@/components/vault'
 import { Shield, Clock, Users, ArrowLeft, Trash2, Zap, UserPlus, Info } from 'lucide-react'
 import { useVault } from '@/hooks/useVault'
 import { useAuth } from '@/hooks/useAuth'
+import type { VaultDisplay } from '@/types'
 
 const VaultDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const { cancelVault, triggerRelease } = useVault()
-    const { userData } = useAuth()
+    const { cancelVault, triggerRelease, fetchVaultDisplay } = useVault()
+    const { stxAddress } = useAuth()
 
     const [loading, setLoading] = useState(true)
-    const [vault, setVault] = useState<any>(null)
+    const [vault, setVault] = useState<VaultDisplay | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        const fetchVault = async () => {
-            if (id) {
-                // In a real app, we'd call the real contract
-                // const data = await getVault(parseInt(id))
-                // setVault(data)
-
-                // Mocking for now
-                setTimeout(() => {
-                    setVault({
-                        id,
-                        name: 'Inheritance Vault',
-                        amount: 750,
-                        conditionType: 2,
-                        targetBlock: 0,
-                        inactivityBlocks: 2000,
-                        requiredThreshold: 2,
-                        released: false,
-                        createdAt: 124500,
-                        owner: userData?.profile?.stxAddress?.testnet || 'ST...',
-                        beneficiary: 'SP3FG...JK21',
-                        approvals: 1
-                    })
-                    setLoading(false)
-                }, 800)
+        const loadVault = async () => {
+            if (!id) return
+            try {
+                const data = await fetchVaultDisplay(parseInt(id))
+                setVault(data)
+            } catch (err) {
+                console.error('Failed to fetch vault:', err)
+                setError('Failed to load vault data.')
+            } finally {
+                setLoading(false)
             }
         }
-        fetchVault()
-    }, [id, userData])
+        loadVault()
+    }, [id, fetchVaultDisplay])
 
     if (loading) return <div className="page-loader"><Spinner size="lg" /></div>
-    if (!vault) return <div>Vault not found</div>
 
-    const isOwner = userData?.profile?.stxAddress?.testnet === vault.owner || userData?.profile?.stxAddress?.mainnet === vault.owner
+    if (error || !vault) {
+        return (
+            <div className="vault-detail-page animate-fade" style={{ textAlign: 'center', paddingTop: '4rem' }}>
+                <Shield size={64} style={{ opacity: 0.5, marginBottom: '1rem' }} />
+                <h2 className="font-heading">{error || 'Vault not found'}</h2>
+                <p className="text-secondary">The vault you are looking for does not exist or could not be loaded.</p>
+                <Button variant="secondary" onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
+            </div>
+        )
+    }
+
+    const isOwner = stxAddress === vault.owner
 
     return (
         <div className="vault-detail-page animate-slide-up">
@@ -61,10 +59,8 @@ const VaultDetail: React.FC = () => {
                 </Button>
                 <div className="header-main">
                     <div className="title-group">
-                        <h1 className="font-heading">{vault.name}</h1>
-                        <Badge variant={vault.released ? 'neutral' : 'success'}>
-                            {vault.released ? 'Released' : 'Active'}
-                        </Badge>
+                        <h1 className="font-heading">Vault #{vault.id}</h1>
+                        <VaultStatusBadge released={vault.released} />
                     </div>
                     <div className="header-actions">
                         {isOwner && !vault.released && (
@@ -81,7 +77,7 @@ const VaultDetail: React.FC = () => {
                     <Card className="amount-card glass">
                         <div className="amount-info">
                             <span className="label">Total Value Locked</span>
-                            <span className="value text-gradient">{vault.amount} STX</span>
+                            <span className="value text-gradient">{vault.amount.toLocaleString()} STX</span>
                         </div>
                         <Zap className="decoration-icon" size={80} />
                     </Card>
@@ -109,7 +105,7 @@ const VaultDetail: React.FC = () => {
                             {vault.conditionType === 3 && (
                                 <div className="info-row">
                                     <span>Required Approvals</span>
-                                    <strong>{vault.approvals} / {vault.requiredThreshold}</strong>
+                                    <strong>{vault.approvalCount} / {vault.requiredThreshold}</strong>
                                 </div>
                             )}
                         </div>
