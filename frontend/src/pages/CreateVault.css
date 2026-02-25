@@ -107,6 +107,12 @@
     gap: var(--space-md);
 }
 
+.review-note {
+    font-size: 0.85rem;
+    text-align: center;
+    margin: 0;
+}
+
 .review-item {
     display: flex;
     justify-content: space-between;
