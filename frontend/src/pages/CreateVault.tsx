@@ -11,6 +11,7 @@ const CreateVault: React.FC = () => {
     const navigate = useNavigate()
     const [step, setStep] = useState(1)
     const { createVault } = useVault()
+    const [errors, setErrors] = useState<Record<string, string>>({})
 
     const [formData, setFormData] = useState({
         name: '',
@@ -23,8 +24,55 @@ const CreateVault: React.FC = () => {
         cosigners: [''],
     })
 
-    const handleNext = () => setStep(s => s + 1)
-    const handleBack = () => setStep(s => s - 1)
+    const validateStep1 = (): boolean => {
+        const errs: Record<string, string> = {}
+        if (!formData.name.trim()) errs.name = 'Vault name is required.'
+        const amount = Number(formData.amount)
+        if (!formData.amount || isNaN(amount) || amount <= 0) errs.amount = 'Amount must be a positive number.'
+        setErrors(errs)
+        return Object.keys(errs).length === 0
+    }
+
+    const validateStep2 = (): boolean => {
+        const errs: Record<string, string> = {}
+        const type = formData.conditionType
+        if (type === '1') {
+            const block = Number(formData.targetBlock)
+            if (!formData.targetBlock || isNaN(block) || block <= 0) errs.targetBlock = 'Target block must be a positive number.'
+        } else if (type === '2') {
+            const blocks = Number(formData.inactivityBlocks)
+            if (!formData.inactivityBlocks || isNaN(blocks) || blocks <= 0) errs.inactivityBlocks = 'Inactivity threshold must be a positive number.'
+        } else if (type === '3') {
+            const thresh = Number(formData.threshold)
+            if (!formData.threshold || isNaN(thresh) || thresh <= 0) errs.threshold = 'Required approvals must be at least 1.'
+        }
+        setErrors(errs)
+        return Object.keys(errs).length === 0
+    }
+
+    const validateStep3 = (): boolean => {
+        const errs: Record<string, string> = {}
+        if (!formData.beneficiary.trim()) {
+            errs.beneficiary = 'Beneficiary address is required.'
+        } else if (!formData.beneficiary.startsWith('SP') && !formData.beneficiary.startsWith('ST')) {
+            errs.beneficiary = 'Must be a valid STX address (starts with SP or ST).'
+        }
+        setErrors(errs)
+        return Object.keys(errs).length === 0
+    }
+
+    const handleNext = () => {
+        let valid = true
+        if (step === 1) valid = validateStep1()
+        else if (step === 2) valid = validateStep2()
+        else if (step === 3) valid = validateStep3()
+        if (valid) setStep(s => s + 1)
+    }
+
+    const handleBack = () => {
+        setErrors({})
+        setStep(s => s - 1)
+    }
 
     const handleSubmit = async () => {
         try {
@@ -55,6 +103,7 @@ const CreateVault: React.FC = () => {
                             placeholder="e.g. My Savings"
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
+                            error={errors.name}
                         />
                         <Input
                             label="Amount (STX)"
@@ -62,6 +111,7 @@ const CreateVault: React.FC = () => {
                             placeholder="0.00"
                             value={formData.amount}
                             onChange={e => setFormData({ ...formData, amount: e.target.value })}
+                            error={errors.amount}
                         />
                         <div className="step-actions">
                             <Button onClick={handleNext} rightIcon={<ArrowRight size={18} />}>Next Step</Button>
@@ -98,6 +148,7 @@ const CreateVault: React.FC = () => {
                                 placeholder="e.g. 150000"
                                 value={formData.targetBlock}
                                 onChange={e => setFormData({ ...formData, targetBlock: e.target.value })}
+                                error={errors.targetBlock}
                             />
                         )}
                         {formData.conditionType === '2' && (
@@ -108,6 +159,7 @@ const CreateVault: React.FC = () => {
                                 helpText="~2 weeks at 10m/block"
                                 value={formData.inactivityBlocks}
                                 onChange={e => setFormData({ ...formData, inactivityBlocks: e.target.value })}
+                                error={errors.inactivityBlocks}
                             />
                         )}
                         {formData.conditionType === '3' && (
@@ -117,6 +169,7 @@ const CreateVault: React.FC = () => {
                                 placeholder="1"
                                 value={formData.threshold}
                                 onChange={e => setFormData({ ...formData, threshold: e.target.value })}
+                                error={errors.threshold}
                             />
                         )}
 
@@ -136,6 +189,7 @@ const CreateVault: React.FC = () => {
                             placeholder="SP..."
                             value={formData.beneficiary}
                             onChange={e => setFormData({ ...formData, beneficiary: e.target.value })}
+                            error={errors.beneficiary}
                         />
 
                         <div className="step-actions">
