@@ -14,7 +14,7 @@ const Approvals: React.FC = () => {
     const { submitApproval } = useVault()
 
     const [loading, setLoading] = useState(true)
-    const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([])
+    const [pendingApprovals] = useState<PendingApproval[]>([])
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
