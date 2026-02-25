@@ -3,6 +3,7 @@ import './Navbar.css'
 import { Link, useLocation } from 'react-router-dom'
 import { Shield, LayoutDashboard, PlusCircle, Activity as ActivityIcon, Wallet, LogOut, ChevronDown, CheckCircle, Settings } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import NetworkIndicator from '@/components/common/NetworkIndicator'
 
 const Navbar: React.FC = () => {
     const location = useLocation()
@@ -58,6 +59,7 @@ const Navbar: React.FC = () => {
                 </div>
 
                 <div className="navbar-actions">
+                    <NetworkIndicator />
                     {isConnected ? (
                         <div className="user-menu" ref={dropdownRef}>
                             <button
