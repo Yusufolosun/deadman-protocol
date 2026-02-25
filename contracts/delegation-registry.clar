@@ -1,7 +1,6 @@
-;; deadman-delegation-registry-v2
+;; delegation-registry
 ;; Stores beneficiary and co-signer designations for each vault.
-;; Vault entries are keyed by vault-id (uint) set by deadman-vault-core-v2.
-;; V2: adds duplicate cosigner rejection.
+;; Vault entries are keyed by vault-id (uint) set by deadman-vault-core.
 
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant ERR-NOT-AUTHORIZED (err u300))

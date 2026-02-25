@@ -38,6 +38,7 @@
 (define-public (set-vote-threshold (threshold uint))
   (begin
     (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (asserts! (>= threshold u1) ERR-NOT-AUTHORIZED)
     (ok (var-set vote-threshold threshold))))
 
 (define-public (set-cooldown (blocks uint))

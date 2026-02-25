@@ -58,10 +58,9 @@
     (asserts! (or (is-eq resolution u1) (is-eq resolution u2)) ERR-INVALID-RESOLUTION)
     (map-set recovery-entries recovery-id
       (merge entry { status: resolution, resolved-at: block-height }))
-    ;; Clean up vault mapping on resolution
-    (if (is-eq resolution u1)
-        (map-delete vault-recovery-id (get vault-id entry))
-        false)
+    ;; Clean up vault mapping on resolution (both approve and reject)
+    ;; so the vault can have a new recovery request submitted
+    (map-delete vault-recovery-id (get vault-id entry))
     (print { event: "recovery-resolved", recovery-id: recovery-id, resolution: resolution })
     (ok true)))
 

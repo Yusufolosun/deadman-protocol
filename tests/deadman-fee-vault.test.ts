@@ -105,7 +105,8 @@ describe("deadman-fee-vault", () => {
       simnet.callPublicFn("deadman-fee-vault", "set-fee-rate", [Cl.uint(50)], deployer);
       simnet.callPublicFn("deadman-fee-vault", "collect-fee", [Cl.uint(1000000)], deployer);
       const total = simnet.callReadOnlyFn("deadman-fee-vault", "get-total-collected", [], deployer);
-      expect(result => Number(total.result) > 0);
+      // 1000000 * 50 / 10000 = 5000
+      expect(total.result).toBeUint(5000);
     });
   });
 
