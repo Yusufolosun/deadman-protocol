@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import type React from 'react'
+import { useState } from 'react'
 import './CreateVault.css'
 import Card from '@/components/common/Card'
 import Button from '@/components/common/Button'
@@ -6,6 +7,9 @@ import Input from '@/components/common/Input'
 import { Shield, Clock, Users, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useVault } from '@/hooks/useVault'
+import { isValidStxAddress, isValidAmount, isValidBlockHeight, isValidInactivityThreshold, isValidThreshold } from '@/lib/validation'
+import { formatSTX, blocksToTime } from '@/lib/format'
+import { stxToMicro } from '@/lib/format'
 
 const CreateVault: React.FC = () => {
     const navigate = useNavigate()
@@ -27,8 +31,7 @@ const CreateVault: React.FC = () => {
     const validateStep1 = (): boolean => {
         const errs: Record<string, string> = {}
         if (!formData.name.trim()) errs.name = 'Vault name is required.'
-        const amount = Number(formData.amount)
-        if (!formData.amount || isNaN(amount) || amount <= 0) errs.amount = 'Amount must be a positive number.'
+        if (!isValidAmount(formData.amount)) errs.amount = 'Amount must be a positive number.'
         setErrors(errs)
         return Object.keys(errs).length === 0
     }
@@ -37,14 +40,11 @@ const CreateVault: React.FC = () => {
         const errs: Record<string, string> = {}
         const type = formData.conditionType
         if (type === '1') {
-            const block = Number(formData.targetBlock)
-            if (!formData.targetBlock || isNaN(block) || block <= 0) errs.targetBlock = 'Target block must be a positive number.'
+            if (!isValidBlockHeight(formData.targetBlock)) errs.targetBlock = 'Target block must be a positive integer.'
         } else if (type === '2') {
-            const blocks = Number(formData.inactivityBlocks)
-            if (!formData.inactivityBlocks || isNaN(blocks) || blocks <= 0) errs.inactivityBlocks = 'Inactivity threshold must be a positive number.'
+            if (!isValidInactivityThreshold(formData.inactivityBlocks)) errs.inactivityBlocks = 'Inactivity threshold must be at least 144 blocks (~1 day).'
         } else if (type === '3') {
-            const thresh = Number(formData.threshold)
-            if (!formData.threshold || isNaN(thresh) || thresh <= 0) errs.threshold = 'Required approvals must be at least 1.'
+            if (!isValidThreshold(formData.threshold)) errs.threshold = 'Required approvals must be at least 1.'
         }
         setErrors(errs)
         return Object.keys(errs).length === 0
@@ -54,7 +54,7 @@ const CreateVault: React.FC = () => {
         const errs: Record<string, string> = {}
         if (!formData.beneficiary.trim()) {
             errs.beneficiary = 'Beneficiary address is required.'
-        } else if (!formData.beneficiary.startsWith('SP') && !formData.beneficiary.startsWith('ST')) {
+        } else if (!isValidStxAddress(formData.beneficiary)) {
             errs.beneficiary = 'Must be a valid STX address (starts with SP or ST).'
         }
         setErrors(errs)
@@ -76,7 +76,7 @@ const CreateVault: React.FC = () => {
 
     const handleSubmit = async () => {
         try {
-            const amount = parseInt(formData.amount)
+            const amount = stxToMicro(formData.amount)
             const type = parseInt(formData.conditionType)
             const target = parseInt(formData.targetBlock) || 0
             const inactivity = parseInt(formData.inactivityBlocks) || 0
@@ -155,8 +155,8 @@ const CreateVault: React.FC = () => {
                             <Input
                                 label="Inactivity Threshold (Blocks)"
                                 type="number"
-                                placeholder="e.g. 2000"
-                                helpText="~2 weeks at 10m/block"
+                                placeholder="e.g. 2016 (~2 weeks)"
+                                helpText={formData.inactivityBlocks ? `≈ ${blocksToTime(Number(formData.inactivityBlocks))}` : 'Minimum 144 blocks (~1 day)'}
                                 value={formData.inactivityBlocks}
                                 onChange={e => setFormData({ ...formData, inactivityBlocks: e.target.value })}
                                 error={errors.inactivityBlocks}
@@ -198,7 +198,13 @@ const CreateVault: React.FC = () => {
                         </div>
                     </div>
                 )
-            case 4:
+            case 4: {
+                const conditionLabel = formData.conditionType === '1' ? 'Block Height' : formData.conditionType === '2' ? 'Inactivity' : 'Threshold'
+                const conditionValue = formData.conditionType === '1'
+                    ? `Block #${Number(formData.targetBlock).toLocaleString()}`
+                    : formData.conditionType === '2'
+                        ? `${Number(formData.inactivityBlocks).toLocaleString()} blocks (${blocksToTime(Number(formData.inactivityBlocks))})`
+                        : `${formData.threshold} approvals required`
                 return (
                     <div className="form-step animate-slide-up">
                         <h2 className="font-heading">Review & Confirm</h2>
@@ -209,23 +215,31 @@ const CreateVault: React.FC = () => {
                             </div>
                             <div className="review-item">
                                 <span>Amount</span>
-                                <strong>{formData.amount || '0'} STX</strong>
+                                <strong>{formatSTX(stxToMicro(formData.amount || '0'))}</strong>
                             </div>
                             <div className="review-item">
                                 <span>Release Condition</span>
-                                <strong>{formData.conditionType === '1' ? 'Block Height' : formData.conditionType === '2' ? 'Inactivity' : 'Threshold'}</strong>
+                                <strong>{conditionLabel}</strong>
+                            </div>
+                            <div className="review-item">
+                                <span>Condition Detail</span>
+                                <strong>{conditionValue}</strong>
                             </div>
                             <div className="review-item">
                                 <span>Beneficiary</span>
                                 <code className="text-xs">{formData.beneficiary || 'Not specified'}</code>
                             </div>
                         </Card>
+                        <p className="review-note text-secondary">
+                            This will open your Stacks wallet to authorize a contract call. The specified STX amount will be locked in the vault.
+                        </p>
                         <div className="step-actions">
                             <Button variant="ghost" onClick={handleBack} leftIcon={<ArrowLeft size={18} />}>Back</Button>
                             <Button onClick={handleSubmit} variant="primary">Confirm & Transact</Button>
                         </div>
                     </div>
                 )
+            }
             case 5:
                 return (
                     <div className="success-step animate-fade">
