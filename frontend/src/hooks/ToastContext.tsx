@@ -1,21 +1,14 @@
-import React, { createContext, useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import Toast from '@/components/common/Toast'
 import type { ToastType } from '@/components/common/Toast'
+import { ToastContext } from './toastContext'
+export { ToastContext } from './toastContext'
 
 interface ToastItem {
   id: number
   message: string
   type: ToastType
 }
-
-interface ToastContextType {
-  showToast: (message: string, type?: ToastType) => void
-  success: (message: string) => void
-  error: (message: string) => void
-  info: (message: string) => void
-}
-
-export const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
 let toastId = 0
 
