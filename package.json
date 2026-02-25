@@ -1,13 +1,20 @@
 {
-  "name": "deadman-protocol-tests",
-  "version": "1.0.0",
+  "name": "deadman-protocol",
+  "version": "0.1.0",
   "description": "On-chain conditional transfer protocol for Stacks",
   "type": "module",
   "private": true,
   "scripts": {
     "test": "vitest run",
     "test:report": "vitest run -- --costs",
-    "test:watch": "chokidar \"tests/**/*.ts\" \"contracts/**/*.clar\" -c \"npm run test:report\""
+    "test:watch": "chokidar \"tests/**/*.ts\" \"contracts/**/*.clar\" -c \"npm run test:report\"",
+    "check": "clarinet check",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:lint": "cd frontend && npm run lint",
+    "frontend:typecheck": "cd frontend && npx tsc -b",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "author": "",
   "license": "ISC",
