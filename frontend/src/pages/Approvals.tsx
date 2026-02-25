@@ -7,40 +7,32 @@ import Spinner from '@/components/common/Spinner'
 import { Users, CheckCircle, Shield } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useVault } from '@/hooks/useVault'
+import type { PendingApproval } from '@/types'
 
 const Approvals: React.FC = () => {
     const { isConnected } = useAuth()
     const { submitApproval } = useVault()
 
     const [loading, setLoading] = useState(true)
-    const [pendingApprovals, setPendingApprovals] = useState<any[]>([])
+    const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([])
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         if (isConnected) {
-            // Mock data: Vaults where user is a co-signer and release is possible
-            setTimeout(() => {
-                setPendingApprovals([
-                    {
-                        id: 3,
-                        name: "Team Treasury",
-                        amount: 5000,
-                        owner: "SP123...456",
-                        condition: "Threshold (3 of 5)",
-                        currentApprovals: 2,
-                        requiredApprovals: 3
-                    }
-                ])
-                setLoading(false)
-            }, 700)
+            // Discovering vaults where the user is a co-signer requires an
+            // event indexer or off-chain registry. Until that infrastructure
+            // exists, we display an empty state. When vault IDs are known,
+            // use useStacks().getApprovalCount / hasApproved per vault.
+            setLoading(false)
         }
     }, [isConnected])
 
     const handleApprove = async (vaultId: number) => {
         try {
             await submitApproval(vaultId)
-            // Success toast would go here
-        } catch (error) {
-            console.error('Approval failed:', error)
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Approval failed'
+            setError(message)
         }
     }
 
@@ -65,33 +57,37 @@ const Approvals: React.FC = () => {
                 <div className="page-loader"><Spinner size="lg" /></div>
             ) : pendingApprovals.length > 0 ? (
                 <div className="approvals-grid">
-                    {pendingApprovals.map((vault) => (
-                        <Card key={vault.id} className="approval-card">
+                    {pendingApprovals.map((approval) => (
+                        <Card key={approval.vaultId} className="approval-card">
                             <div className="card-header">
                                 <div>
-                                    <h3 className="card-title">{vault.name}</h3>
-                                    <span className="owner-label">Owned by {vault.owner}</span>
+                                    <h3 className="card-title">Vault #{approval.vaultId}</h3>
+                                    <span className="owner-label">Owned by {approval.vaultOwner}</span>
                                 </div>
-                                <Badge variant="warning">{vault.currentApprovals} / {vault.requiredApprovals} Signed</Badge>
+                                <Badge variant="warning">{approval.currentApprovals} / {approval.requiredApprovals} Signed</Badge>
                             </div>
 
                             <div className="vault-preview">
                                 <div className="preview-item">
                                     <span className="label">Total Amount</span>
-                                    <span className="value">{vault.amount} STX</span>
+                                    <span className="value">{approval.amount.toLocaleString()} STX</span>
                                 </div>
                                 <div className="preview-item">
                                     <span className="label">Condition</span>
-                                    <span className="value">{vault.condition}</span>
+                                    <span className="value">{approval.condition}</span>
                                 </div>
                             </div>
+
+                            {error && (
+                                <p className="text-error" style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>{error}</p>
+                            )}
 
                             <div className="card-actions">
                                 <Button
                                     variant="primary"
                                     fullWidth
                                     leftIcon={<CheckCircle size={18} />}
-                                    onClick={() => handleApprove(vault.id)}
+                                    onClick={() => handleApprove(approval.vaultId)}
                                 >
                                     Submit My Approval
                                 </Button>
