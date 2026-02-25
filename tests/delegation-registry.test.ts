@@ -188,6 +188,47 @@ describe("delegation-registry", () => {
     });
   });
 
+  describe("get-cosigner", () => {
+    it("returns none for empty slot", () => {
+      const result = simnet.callReadOnlyFn(
+        "delegation-registry",
+        "get-cosigner",
+        [Cl.uint(1), Cl.uint(0)],
+        deployer
+      );
+      expect(result.result).toBeNone();
+    });
+
+    it("returns cosigner at the correct index", () => {
+      simnet.callPublicFn(
+        "delegation-registry",
+        "add-cosigner",
+        [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
+        deployer
+      );
+      simnet.callPublicFn(
+        "delegation-registry",
+        "add-cosigner",
+        [Cl.uint(1), Cl.principal(wallet3), Cl.principal(wallet1), Cl.uint(5)],
+        deployer
+      );
+      const first = simnet.callReadOnlyFn(
+        "delegation-registry",
+        "get-cosigner",
+        [Cl.uint(1), Cl.uint(0)],
+        deployer
+      );
+      expect(first.result).toBeSome(Cl.principal(wallet2));
+      const second = simnet.callReadOnlyFn(
+        "delegation-registry",
+        "get-cosigner",
+        [Cl.uint(1), Cl.uint(1)],
+        deployer
+      );
+      expect(second.result).toBeSome(Cl.principal(wallet3));
+    });
+  });
+
   describe("submit-approval", () => {
     it("allows a registered cosigner to approve", () => {
       // Add wallet2 as cosigner for vault 1

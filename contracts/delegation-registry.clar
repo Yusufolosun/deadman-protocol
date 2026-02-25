@@ -69,6 +69,9 @@
 (define-read-only (get-beneficiary (vault-id uint))
   (map-get? vault-beneficiary vault-id))
 
+(define-read-only (get-cosigner (vault-id uint) (index uint))
+  (map-get? vault-cosigner { vault-id: vault-id, index: index }))
+
 (define-read-only (get-cosigner-count (vault-id uint))
   (default-to u0 (map-get? vault-cosigner-count vault-id)))
 
