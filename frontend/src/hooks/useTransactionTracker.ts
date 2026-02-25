@@ -76,9 +76,10 @@ export const useTransactionTracker = () => {
 
   // Cleanup intervals on unmount
   useEffect(() => {
+    const intervals = pollIntervals.current
     return () => {
-      pollIntervals.current.forEach((interval) => clearInterval(interval))
-      pollIntervals.current.clear()
+      intervals.forEach((interval) => clearInterval(interval))
+      intervals.clear()
     }
   }, [])
 
