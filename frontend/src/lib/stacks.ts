@@ -5,6 +5,11 @@ export const getNetwork = () => {
     return networkType === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET
 }
 
+export const getNetworkName = (): string => {
+    const networkType = import.meta.env.VITE_NETWORK || 'testnet'
+    return networkType === 'mainnet' ? 'Stacks Mainnet' : 'Stacks Testnet'
+}
+
 export const getContractOwnerAddress = () => {
     return import.meta.env.VITE_CONTRACT_ADDRESS || ''
 }
