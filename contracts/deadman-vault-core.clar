@@ -116,7 +116,7 @@
       success (begin
         (print { event: "vault-cancelled", vault-id: vault-id, owner: (get owner vault) })
         (ok true))
-      error ERR-CANCEL-FAILED))))
+      error ERR-CANCEL-FAILED)))
 
 ;; --- Read Functions ---
 
