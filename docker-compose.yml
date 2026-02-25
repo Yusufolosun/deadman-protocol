@@ -1,0 +1,11 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_NETWORK: ${VITE_NETWORK:-testnet}
+        VITE_CONTRACT_ADDRESS: ${VITE_CONTRACT_ADDRESS:-}
+    ports:
+      - "3000:80"
+    restart: unless-stopped
