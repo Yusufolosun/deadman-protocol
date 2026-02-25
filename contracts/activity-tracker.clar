@@ -3,8 +3,6 @@
 ;; Used by condition-engine to evaluate inactivity-based vault triggers.
 ;; Any principal can ping to update their own record.
 
-(define-constant ERR-SELF-ONLY (err u200))
-
 ;; Map from principal to last-seen block height
 (define-map last-active-block principal uint)
 

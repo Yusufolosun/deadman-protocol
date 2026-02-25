@@ -6,7 +6,6 @@
 (define-constant ERR-NOT-AUTHORIZED (err u300))
 (define-constant ERR-SELF-DELEGATION (err u301))
 (define-constant ERR-TOO-MANY (err u302))
-(define-constant ERR-NOT-FOUND (err u303))
 (define-constant ERR-ALREADY-APPROVED (err u304))
 (define-constant ERR-NOT-COSIGNER (err u305))
 

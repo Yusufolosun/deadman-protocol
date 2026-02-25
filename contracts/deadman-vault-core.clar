@@ -3,8 +3,6 @@
 ;; Users create vaults, configure conditions, deposit STX, and trigger releases here.
 ;; Orchestrates all other contracts.
 
-(define-constant CONTRACT-OWNER tx-sender)
-(define-constant ERR-NOT-OWNER (err u600))
 (define-constant ERR-PAUSED (err u601))
 (define-constant ERR-INVALID-CONDITION (err u602))
 (define-constant ERR-VAULT-NOT-FOUND (err u603))
@@ -13,7 +11,6 @@
 (define-constant ERR-CONDITIONS-NOT-MET (err u606))
 (define-constant ERR-LOCK-TOO-SHORT (err u607))
 (define-constant ERR-ZERO-DEPOSIT (err u608))
-(define-constant ERR-DEPOSIT-FAILED (err u609))
 (define-constant ERR-CANCEL-FAILED (err u610))
 
 (define-data-var next-vault-id uint u1)
@@ -41,8 +38,7 @@
   (let (
     (vault-id (var-get next-vault-id))
     (cfg (contract-call? .admin-config get-config))
-    (min-lock (get min-lock-blocks cfg))
-    (max-cosigners (get max-cosigners cfg)))
+    (min-lock (get min-lock-blocks cfg)))
     (asserts! (not (get paused cfg)) ERR-PAUSED)
     (asserts! (> amount u0) ERR-ZERO-DEPOSIT)
     (asserts! (and (>= condition-type u1) (<= condition-type u3)) ERR-INVALID-CONDITION)
