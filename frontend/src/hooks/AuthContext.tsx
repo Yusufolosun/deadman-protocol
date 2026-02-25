@@ -6,6 +6,7 @@ interface AuthContextType {
     userSession: UserSession
     userData: UserData | null
     isConnected: boolean
+    stxAddress: string | null
     connect: () => void
     disconnect: () => void
 }
@@ -46,10 +47,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserData(null)
     }, [])
 
+    const stxAddress = userData?.profile?.stxAddress?.testnet ?? null
+
     const value = {
         userSession,
         userData,
         isConnected: !!userData,
+        stxAddress,
         connect,
         disconnect,
     }
