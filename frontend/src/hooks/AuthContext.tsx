@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react'
-import { AppConfig, UserSession, showConnect, UserData } from '@stacks/connect'
+import { AppConfig, UserSession, showConnect } from '@stacks/connect'
+import type { UserData } from '@stacks/connect'
 import { APP_DETAILS } from '@/lib/stacks'
 
 interface AuthContextType {
