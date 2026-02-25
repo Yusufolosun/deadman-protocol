@@ -298,6 +298,86 @@ describe("deadman-vault-core", () => {
     });
   });
 
+  describe("owner vault index", () => {
+    it("returns zero count for owner with no vaults", () => {
+      const result = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-owner-vault-count",
+        [Cl.principal(wallet1)],
+        deployer
+      );
+      expect(result.result).toBeUint(0);
+    });
+
+    it("tracks vault count per owner", () => {
+      const targetBlock = simnet.blockHeight + 200;
+      createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
+      createBlockHeightVault(wallet1, 2000000, simnet.blockHeight + 200, wallet3);
+
+      const count = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-owner-vault-count",
+        [Cl.principal(wallet1)],
+        deployer
+      );
+      expect(count.result).toBeUint(2);
+    });
+
+    it("returns vault id by owner and index", () => {
+      const targetBlock = simnet.blockHeight + 200;
+      createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
+      createBlockHeightVault(wallet1, 2000000, simnet.blockHeight + 200, wallet3);
+
+      const first = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-owner-vault-id",
+        [Cl.principal(wallet1), Cl.uint(0)],
+        deployer
+      );
+      expect(first.result).toBeSome(Cl.uint(1));
+
+      const second = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-owner-vault-id",
+        [Cl.principal(wallet1), Cl.uint(1)],
+        deployer
+      );
+      expect(second.result).toBeSome(Cl.uint(2));
+    });
+
+    it("returns none for out-of-bounds index", () => {
+      const result = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-owner-vault-id",
+        [Cl.principal(wallet1), Cl.uint(99)],
+        deployer
+      );
+      expect(result.result).toBeNone();
+    });
+
+    it("isolates vault counts between owners", () => {
+      const targetBlock = simnet.blockHeight + 200;
+      createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
+      createBlockHeightVault(wallet3, 2000000, simnet.blockHeight + 200, wallet4);
+
+      const count1 = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-owner-vault-count",
+        [Cl.principal(wallet1)],
+        deployer
+      );
+      expect(count1.result).toBeUint(1);
+
+      const count3 = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-owner-vault-count",
+        [Cl.principal(wallet3)],
+        deployer
+      );
+      expect(count3.result).toBeUint(1);
+    });
+  });
+
   describe("add-cosigner", () => {
     it("allows vault owner to add a cosigner", () => {
       const targetBlock = simnet.blockHeight + 200;

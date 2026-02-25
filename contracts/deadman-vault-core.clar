@@ -26,6 +26,10 @@
   created-at: uint
 })
 
+;; Index: owner -> vault-id at position
+(define-map owner-vault-ids { owner: principal, index: uint } uint)
+(define-map owner-vault-count principal uint)
+
 ;; --- Vault Creation ---
 
 (define-public (create-vault
@@ -61,6 +65,8 @@
       released: false,
       created-at: block-height
     })
+    (map-set owner-vault-ids { owner: tx-sender, index: (default-to u0 (map-get? owner-vault-count tx-sender)) } vault-id)
+    (map-set owner-vault-count tx-sender (+ (default-to u0 (map-get? owner-vault-count tx-sender)) u1))
     (var-set next-vault-id (+ vault-id u1))
     (print { event: "vault-created", vault-id: vault-id, owner: tx-sender, amount: amount, condition-type: condition-type })
     (ok vault-id)))
@@ -121,3 +127,9 @@
 
 (define-read-only (get-next-vault-id)
   (var-get next-vault-id))
+
+(define-read-only (get-owner-vault-count (owner principal))
+  (default-to u0 (map-get? owner-vault-count owner)))
+
+(define-read-only (get-owner-vault-id (owner principal) (index uint))
+  (map-get? owner-vault-ids { owner: owner, index: index }))
