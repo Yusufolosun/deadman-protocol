@@ -1,9 +1,11 @@
 /** Condition type constants matching the Clarity contract */
-export enum ConditionType {
-    BlockHeight = 1,
-    Inactivity = 2,
-    Threshold = 3,
-}
+export const ConditionType = {
+    BlockHeight: 1,
+    Inactivity: 2,
+    Threshold: 3,
+} as const
+
+export type ConditionType = (typeof ConditionType)[keyof typeof ConditionType]
 
 /** On-chain vault data returned by get-vault read-only call */
 export interface Vault {

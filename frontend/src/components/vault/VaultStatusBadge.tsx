@@ -7,7 +7,7 @@ interface VaultStatusBadgeProps {
     released: boolean
 }
 
-export function getVaultStatus(released: boolean): VaultStatus {
+function getVaultStatus(released: boolean): VaultStatus {
     return released ? 'released' : 'active'
 }
 
