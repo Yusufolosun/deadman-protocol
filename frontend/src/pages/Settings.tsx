@@ -5,35 +5,55 @@ import Button from '@/components/common/Button'
 import Spinner from '@/components/common/Spinner'
 import { Info, ShieldAlert, Cpu, Network } from 'lucide-react'
 import { useStacks } from '@/hooks/useStacks'
+import { getContractOwnerAddress, getNetworkName } from '@/lib/stacks'
+import type { ProtocolConfig } from '@/types'
 
 const SettingsPage: React.FC = () => {
     const { getProtocolConfig } = useStacks()
 
     const [loading, setLoading] = useState(true)
-    const [config, setConfig] = useState<any>(null)
+    const [config, setConfig] = useState<ProtocolConfig | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchConfig = async () => {
-            // In a real app, query admin-config contract
-            // const data = await getProtocolConfig()
-            // setConfig(data)
-
-            // Mock data
-            setTimeout(() => {
-                setConfig({
-                    minLockBlocks: 144,
-                    maxCosigners: 5,
-                    protocolPaused: false,
-                    owner: 'SP123...789',
-                    network: 'Stacks Testnet'
-                })
+            try {
+                const data = await getProtocolConfig()
+                if (data) {
+                    setConfig({
+                        minLockBlocks: Number(data['min-lock-blocks'] ?? data.minLockBlocks ?? 144),
+                        maxCosigners: Number(data['max-cosigners'] ?? data.maxCosigners ?? 5),
+                        maxBeneficiaries: Number(data['max-beneficiaries'] ?? data.maxBeneficiaries ?? 5),
+                        paused: Boolean(data['protocol-paused'] ?? data.paused ?? false),
+                    })
+                } else {
+                    setError('Failed to load protocol configuration.')
+                }
+            } catch (err) {
+                console.error('Failed to fetch config:', err)
+                setError('Failed to load protocol configuration.')
+            } finally {
                 setLoading(false)
-            }, 500)
+            }
         }
         fetchConfig()
-    }, [])
+    }, [getProtocolConfig])
 
     if (loading) return <div className="page-loader"><Spinner size="lg" /></div>
+
+    if (error || !config) {
+        return (
+            <div className="settings-page animate-fade">
+                <header className="page-header">
+                    <h1 className="font-heading">Protocol Settings</h1>
+                </header>
+                <Card>
+                    <p className="text-secondary">{error || 'Unable to load configuration.'}</p>
+                    <Button variant="secondary" onClick={() => window.location.reload()}>Retry</Button>
+                </Card>
+            </div>
+        )
+    }
 
     return (
         <div className="settings-page animate-slide-up">
@@ -61,6 +81,20 @@ const SettingsPage: React.FC = () => {
                                 </div>
                                 <strong>{config.maxCosigners}</strong>
                             </div>
+                            <div className="config-item">
+                                <div className="item-label">
+                                    <span>Maximum Beneficiaries</span>
+                                    <p className="helper">Max beneficiaries per vault.</p>
+                                </div>
+                                <strong>{config.maxBeneficiaries}</strong>
+                            </div>
+                            <div className="config-item">
+                                <div className="item-label">
+                                    <span>Protocol Status</span>
+                                    <p className="helper">Whether new vaults can be created.</p>
+                                </div>
+                                <strong>{config.paused ? 'Paused' : 'Active'}</strong>
+                            </div>
                         </div>
                     </Card>
 
@@ -69,11 +103,11 @@ const SettingsPage: React.FC = () => {
                         <div className="config-list">
                             <div className="config-item">
                                 <span>Target Network</span>
-                                <strong>{config.network}</strong>
+                                <strong>{getNetworkName()}</strong>
                             </div>
                             <div className="config-item">
                                 <span>Contract Owner</span>
-                                <code className="address-mini">{config.owner}</code>
+                                <code className="address-mini">{getContractOwnerAddress()}</code>
                             </div>
                         </div>
                     </Card>
