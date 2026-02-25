@@ -1,33 +1,41 @@
 import React from 'react'
 import Badge from '../common/Badge'
+import { VaultStatusValues as VaultStatus } from '@/types'
 
-export type VaultStatus = 'active' | 'released' | 'cancelled'
+type VaultStatusLabel = 'active' | 'released' | 'cancelled'
 
 interface VaultStatusBadgeProps {
-    released: boolean
+    status: number
 }
 
-function getVaultStatus(released: boolean): VaultStatus {
-    return released ? 'released' : 'active'
+function getVaultStatusLabel(status: number): VaultStatusLabel {
+    switch (status) {
+        case VaultStatus.Released:
+            return 'released'
+        case VaultStatus.Cancelled:
+            return 'cancelled'
+        default:
+            return 'active'
+    }
 }
 
-const statusLabels: Record<VaultStatus, string> = {
+const statusLabels: Record<VaultStatusLabel, string> = {
     active: 'Active',
     released: 'Released',
     cancelled: 'Cancelled',
 }
 
-const statusVariants: Record<VaultStatus, 'success' | 'warning' | 'error' | 'info'> = {
+const statusVariants: Record<VaultStatusLabel, 'success' | 'warning' | 'error' | 'info'> = {
     active: 'success',
     released: 'info',
     cancelled: 'warning',
 }
 
-const VaultStatusBadge: React.FC<VaultStatusBadgeProps> = ({ released }) => {
-    const status = getVaultStatus(released)
+const VaultStatusBadge: React.FC<VaultStatusBadgeProps> = ({ status }) => {
+    const label = getVaultStatusLabel(status)
     return (
-        <Badge variant={statusVariants[status]}>
-            {statusLabels[status]}
+        <Badge variant={statusVariants[label]}>
+            {statusLabels[label]}
         </Badge>
     )
 }

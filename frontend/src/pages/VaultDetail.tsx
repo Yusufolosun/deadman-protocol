@@ -9,6 +9,7 @@ import { Shield, Clock, Users, ArrowLeft, Trash2, Zap, UserPlus, Info } from 'lu
 import { useVault } from '@/hooks/useVault'
 import { useAuth } from '@/hooks/useAuth'
 import type { VaultDisplay } from '@/types'
+import { VaultStatusValues as VaultStatus } from '@/types'
 
 const VaultDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>()
@@ -60,10 +61,10 @@ const VaultDetail: React.FC = () => {
                 <div className="header-main">
                     <div className="title-group">
                         <h1 className="font-heading">Vault #{vault.id}</h1>
-                        <VaultStatusBadge released={vault.released} />
+                        <VaultStatusBadge status={vault.status} />
                     </div>
                     <div className="header-actions">
-                        {isOwner && !vault.released && (
+                        {isOwner && vault.status === VaultStatus.Active && (
                             <Button variant="danger" size="sm" leftIcon={<Trash2 size={16} />} onClick={() => cancelVault(parseInt(id!))}>
                                 Cancel Vault
                             </Button>
@@ -109,7 +110,7 @@ const VaultDetail: React.FC = () => {
                                 </div>
                             )}
                         </div>
-                        {!vault.released && (
+                        {vault.status === VaultStatus.Active && (
                             <div className="condition-action">
                                 <Button variant="outline" fullWidth onClick={() => triggerRelease(parseInt(id!))}>
                                     Attempt Manual Release

@@ -29,7 +29,7 @@ const VaultCard: React.FC<VaultCardProps> = ({ vault, onClick }) => {
         <Card hoverable onClick={onClick}>
             <div className="vault-card-header">
                 <h3 className="vault-card-title">Vault #{vault.id}</h3>
-                <VaultStatusBadge released={vault.released} />
+                <VaultStatusBadge status={vault.status} />
             </div>
             <div className="vault-card-details">
                 <div className="vault-card-detail">

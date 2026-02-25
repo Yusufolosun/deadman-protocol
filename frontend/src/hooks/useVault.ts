@@ -76,7 +76,7 @@ export const useVault = () => {
             targetBlock: Number(vault['target-block']),
             inactivityBlocks: Number(vault['inactivity-blocks']),
             requiredThreshold: Number(vault['required-threshold']),
-            released: vault.released,
+            status: Number(vault.status ?? 0),
             createdAt: Number(vault['created-at']),
             beneficiary: beneficiary ?? null,
             cosignerCount: Number(cosignerCount ?? 0),

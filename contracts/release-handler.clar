@@ -1,6 +1,9 @@
 ;; release-handler
-;; Executes STX transfer to beneficiary once conditions are verified.
-;; Not directly callable by users. Called exclusively by deadman-vault-core.
+;; Standalone STX release utility.
+;; NOTE: As of the architecture update, deadman-vault-core transfers STX
+;; directly to beneficiaries using its own as-contract balance.
+;; This contract is retained for standalone use and potential future extensions
+;; (e.g. partial releases, multi-token support).
 ;; Emits a structured release event on success.
 
 (define-constant CONTRACT-OWNER tx-sender)

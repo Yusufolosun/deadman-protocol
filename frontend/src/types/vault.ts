@@ -7,6 +7,15 @@ export const ConditionType = {
 
 export type ConditionType = (typeof ConditionType)[keyof typeof ConditionType]
 
+/** Vault status constants matching the Clarity contract */
+export const VaultStatus = {
+    Active: 0,
+    Released: 1,
+    Cancelled: 2,
+} as const
+
+export type VaultStatus = (typeof VaultStatus)[keyof typeof VaultStatus]
+
 /** On-chain vault data returned by get-vault read-only call */
 export interface Vault {
     owner: string
@@ -15,7 +24,7 @@ export interface Vault {
     targetBlock: number
     inactivityBlocks: number
     requiredThreshold: number
-    released: boolean
+    status: VaultStatus
     createdAt: number
 }
 

@@ -8,6 +8,7 @@
 (define-constant ERR-TOO-MANY (err u302))
 (define-constant ERR-ALREADY-APPROVED (err u304))
 (define-constant ERR-NOT-COSIGNER (err u305))
+(define-constant ERR-ALREADY-COSIGNER (err u306))
 
 (define-data-var authorized-caller principal CONTRACT-OWNER)
 
@@ -53,6 +54,7 @@
     (asserts! (is-authorized) ERR-NOT-AUTHORIZED)
     (asserts! (not (is-eq cosigner owner)) ERR-SELF-DELEGATION)
     (asserts! (< current-count max-allowed) ERR-TOO-MANY)
+    (asserts! (not (is-cosigner vault-id cosigner)) ERR-ALREADY-COSIGNER)
     (map-set vault-cosigner { vault-id: vault-id, index: current-count } cosigner)
     (ok (map-set vault-cosigner-count vault-id (+ current-count u1)))))
 

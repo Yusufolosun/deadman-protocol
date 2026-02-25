@@ -1,12 +1,12 @@
 {
   "name": "deadman-protocol-tests",
   "version": "1.0.0",
-  "description": "Run unit tests on this project.",
+  "description": "On-chain conditional transfer protocol for Stacks",
   "type": "module",
   "private": true,
   "scripts": {
     "test": "vitest run",
-    "test:report": "vitest run -- --coverage --costs",
+    "test:report": "vitest run -- --costs",
     "test:watch": "chokidar \"tests/**/*.ts\" \"contracts/**/*.clar\" -c \"npm run test:report\""
   },
   "author": "",

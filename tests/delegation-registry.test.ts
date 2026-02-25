@@ -158,6 +158,23 @@ describe("delegation-registry", () => {
       );
       expect(result.result).toBeErr(Cl.uint(302));
     });
+
+    it("rejects duplicate cosigner", () => {
+      simnet.callPublicFn(
+        "delegation-registry",
+        "add-cosigner",
+        [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
+        deployer
+      );
+      // Adding the same cosigner again should fail
+      const result = simnet.callPublicFn(
+        "delegation-registry",
+        "add-cosigner",
+        [Cl.uint(1), Cl.principal(wallet2), Cl.principal(wallet1), Cl.uint(5)],
+        deployer
+      );
+      expect(result.result).toBeErr(Cl.uint(306));
+    });
   });
 
   describe("is-cosigner", () => {

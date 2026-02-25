@@ -11,17 +11,11 @@ const wallet5 = accounts.get("wallet_5")!;
 
 const vaultCorePrincipal = `${deployer}.deadman-vault-core`;
 
-// Set vault-core as the authorized caller for delegation-registry and
-// release-handler so that cross-contract calls pass authorization
+// Set vault-core as the authorized caller for delegation-registry
+// so that cross-contract calls pass authorization
 function setupAuthorizedCallers() {
   simnet.callPublicFn(
     "delegation-registry",
-    "set-authorized-caller",
-    [Cl.principal(vaultCorePrincipal)],
-    deployer
-  );
-  simnet.callPublicFn(
-    "release-handler",
     "set-authorized-caller",
     [Cl.principal(vaultCorePrincipal)],
     deployer
@@ -266,7 +260,7 @@ describe("deadman-vault-core", () => {
           "target-block": Cl.uint(targetBlock),
           "inactivity-blocks": Cl.uint(0),
           "required-threshold": Cl.uint(0),
-          released: Cl.bool(false),
+          status: Cl.uint(0),
           "created-at": Cl.uint(simnet.blockHeight),
         })
       );
@@ -656,10 +650,6 @@ describe("deadman-vault-core", () => {
       const targetBlock = simnet.blockHeight + 150;
       createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
 
-      // Fund the release-handler contract so the transfer succeeds
-      const releaseHandlerContract = `${deployer}.release-handler`;
-      simnet.transferSTX(1000000, releaseHandlerContract, wallet1);
-
       // Mine blocks until target is reached
       const blocksNeeded = targetBlock - simnet.blockHeight + 1;
       simnet.mineEmptyBlocks(blocksNeeded);
@@ -675,10 +665,6 @@ describe("deadman-vault-core", () => {
 
     it("succeeds with threshold condition when approvals met", () => {
       createThresholdVault(wallet1, 1000000, 2, wallet2);
-
-      // Fund release-handler
-      const releaseHandlerContract = `${deployer}.release-handler`;
-      simnet.transferSTX(1000000, releaseHandlerContract, wallet1);
 
       // Add 2 cosigners and get 2 approvals
       simnet.callPublicFn(
@@ -718,10 +704,6 @@ describe("deadman-vault-core", () => {
     it("marks vault as released after successful trigger", () => {
       createThresholdVault(wallet1, 1000000, 1, wallet2);
 
-      // Fund release-handler
-      const releaseHandlerContract = `${deployer}.release-handler`;
-      simnet.transferSTX(1000000, releaseHandlerContract, wallet1);
-
       // Add cosigner and approve
       simnet.callPublicFn(
         "deadman-vault-core",
@@ -750,18 +732,14 @@ describe("deadman-vault-core", () => {
         [Cl.uint(1)],
         deployer
       );
-      // The vault should exist and be marked released
+      // The vault should exist and be marked released (status = 1)
       const vaultData = vault.result as any;
       expect(vaultData.type).toBe("some");
-      expect(vaultData.value.value.released.type).toBe("true");
+      expect(vaultData.value.value.status.value).toBe(1n);
     });
 
     it("prevents double release", () => {
       createThresholdVault(wallet1, 1000000, 1, wallet2);
-
-      // Fund release-handler with enough for one release
-      const releaseHandlerContract = `${deployer}.release-handler`;
-      simnet.transferSTX(2000000, releaseHandlerContract, wallet1);
 
       // Add cosigner and approve
       simnet.callPublicFn(
@@ -794,6 +772,176 @@ describe("deadman-vault-core", () => {
         wallet1
       );
       expect(second.result).toBeErr(Cl.uint(605));
+    });
+
+    it("transfers STX directly from vault-core to beneficiary", () => {
+      createThresholdVault(wallet1, 1000000, 1, wallet2);
+
+      // Record beneficiary balance before release
+      const assetsBefore = simnet.getAssetsMap();
+      const beneficiaryBefore = assetsBefore.get("STX")?.get(wallet2) ?? BigInt(0);
+
+      // Add cosigner and approve
+      simnet.callPublicFn(
+        "deadman-vault-core",
+        "add-cosigner",
+        [Cl.uint(1), Cl.principal(wallet3)],
+        wallet1
+      );
+      simnet.callPublicFn(
+        "deadman-vault-core",
+        "submit-approval",
+        [Cl.uint(1)],
+        wallet3
+      );
+
+      simnet.callPublicFn(
+        "deadman-vault-core",
+        "trigger-release",
+        [Cl.uint(1)],
+        wallet1
+      );
+
+      // Beneficiary should have received 1000000 STX
+      const assetsAfter = simnet.getAssetsMap();
+      const beneficiaryAfter = assetsAfter.get("STX")?.get(wallet2) ?? BigInt(0);
+      expect(beneficiaryAfter - beneficiaryBefore).toBe(BigInt(1000000));
+    });
+
+    it("emits vault-released event with beneficiary and amount", () => {
+      createThresholdVault(wallet1, 1000000, 1, wallet2);
+
+      simnet.callPublicFn(
+        "deadman-vault-core",
+        "add-cosigner",
+        [Cl.uint(1), Cl.principal(wallet3)],
+        wallet1
+      );
+      simnet.callPublicFn(
+        "deadman-vault-core",
+        "submit-approval",
+        [Cl.uint(1)],
+        wallet3
+      );
+
+      const result = simnet.callPublicFn(
+        "deadman-vault-core",
+        "trigger-release",
+        [Cl.uint(1)],
+        wallet1
+      );
+      expect(result.result).toBeOk(Cl.bool(true));
+
+      const printEvent = result.events.find(
+        (e) => e.event === "print_event"
+      );
+      expect(printEvent).toBeDefined();
+    });
+  });
+
+  describe("vault status", () => {
+    it("get-vault-status returns none for non-existent vault", () => {
+      const result = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-vault-status",
+        [Cl.uint(999)],
+        deployer
+      );
+      expect(result.result).toBeNone();
+    });
+
+    it("get-vault-status returns 0 (active) for new vault", () => {
+      const targetBlock = simnet.blockHeight + 200;
+      createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
+
+      const result = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-vault-status",
+        [Cl.uint(1)],
+        deployer
+      );
+      expect(result.result).toBeSome(Cl.uint(0));
+    });
+
+    it("distinguishes cancelled (status 2) from released (status 1)", () => {
+      const targetBlock = simnet.blockHeight + 200;
+      createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
+      createThresholdVault(wallet1, 1000000, 1, wallet3);
+
+      // Cancel vault 1
+      simnet.callPublicFn(
+        "deadman-vault-core",
+        "cancel-vault",
+        [Cl.uint(1)],
+        wallet1
+      );
+
+      // Release vault 2
+      simnet.callPublicFn(
+        "deadman-vault-core",
+        "add-cosigner",
+        [Cl.uint(2), Cl.principal(wallet4)],
+        wallet1
+      );
+      simnet.callPublicFn(
+        "deadman-vault-core",
+        "submit-approval",
+        [Cl.uint(2)],
+        wallet4
+      );
+      simnet.callPublicFn(
+        "deadman-vault-core",
+        "trigger-release",
+        [Cl.uint(2)],
+        wallet1
+      );
+
+      // Vault 1 should be cancelled (status 2)
+      const status1 = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-vault-status",
+        [Cl.uint(1)],
+        deployer
+      );
+      expect(status1.result).toBeSome(Cl.uint(2));
+
+      // Vault 2 should be released (status 1)
+      const status2 = simnet.callReadOnlyFn(
+        "deadman-vault-core",
+        "get-vault-status",
+        [Cl.uint(2)],
+        deployer
+      );
+      expect(status2.result).toBeSome(Cl.uint(1));
+    });
+  });
+
+  describe("auto-ping on inactivity vault", () => {
+    it("sets last-active-block for owner when creating inactivity vault", () => {
+      createInactivityVault(wallet1, 1000000, 200, wallet2);
+
+      const result = simnet.callReadOnlyFn(
+        "activity-tracker",
+        "get-last-active",
+        [Cl.principal(wallet1)],
+        deployer
+      );
+      // Should have a last-active-block set (not none)
+      expect(result.result).not.toBeNone();
+    });
+
+    it("does not auto-ping for block-height vaults", () => {
+      const targetBlock = simnet.blockHeight + 200;
+      createBlockHeightVault(wallet1, 1000000, targetBlock, wallet2);
+
+      const result = simnet.callReadOnlyFn(
+        "activity-tracker",
+        "get-last-active",
+        [Cl.principal(wallet1)],
+        deployer
+      );
+      // Block-height vaults don't auto-ping
+      expect(result.result).toBeNone();
     });
   });
 });
