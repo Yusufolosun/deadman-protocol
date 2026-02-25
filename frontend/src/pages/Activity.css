@@ -5,6 +5,12 @@
     padding: var(--space-xl) 0;
 }
 
+.activity-page .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
 .activity-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -77,6 +83,75 @@
     color: var(--text-tertiary);
     text-align: center;
     margin: 0;
+}
+
+.ping-success {
+    font-size: 0.8rem;
+    color: var(--success);
+    text-align: center;
+    margin: 0;
+}
+
+/* Blocks Ago / Current Block */
+.blocks-ago,
+.current-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.blocks-ago .label,
+.current-block .label {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.blocks-ago .value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.current-block .value-sm {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: 'Outfit', sans-serif;
+}
+
+.text-warning {
+    color: var(--warning) !important;
+}
+
+/* Stale Warning */
+.stale-warning {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    color: var(--warning);
+}
+
+.pulse-dot.stale {
+    background: var(--warning);
+    box-shadow: 0 0 10px var(--warning);
+}
+
+/* Info List */
+.info-list {
+    margin: var(--space-md) 0 0;
+    padding-left: var(--space-lg);
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 /* Info Card */
